@@ -1,6 +1,7 @@
-package reusable;
+package pdfvalidation;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -11,15 +12,14 @@ import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.io.IOException;
 import testsettings.TestRunSettings;
 
 public class RenameDownloadedFile 
 {
-	private RenameDownloadedFile() {
+   private RenameDownloadedFile() {
         
     }
-	
+
 	private static final Logger logger =LoggerFactory.getLogger(RenameDownloadedFile.class.getName());
 	
 	public static String getCurrentDate()
@@ -84,6 +84,8 @@ public class RenameDownloadedFile
 
         }
     }
+    
+
     
     class FileRenameException extends Exception {
         public FileRenameException(String message) {
