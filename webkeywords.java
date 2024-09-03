@@ -12,6 +12,7 @@ import report_utilities.Model.ExtentModel.PageDetails;
 import report_utilities.common.ReportCommon;
 import report_utilities.common.ScreenshotCommon;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -1527,42 +1528,30 @@ Thread.sleep(100);				break;
 
 
 
-	public void FluentWait(WebDriver _driver, WebElement element) throws Exception
-	{
 
-		try
-		{																		
+	public void FluentWait(WebDriver _driver, WebElement element) throws Exception {
+	    try {
+	        Wait<WebDriver> wait2 = new FluentWait<>(_driver)
+	                .withTimeout(Duration.ofSeconds(1000))
+	                .pollingEvery(Duration.ofSeconds(5))
+	                .ignoring(Exception.class)
+	                .ignoring(NoSuchElementException.class)
+	                .ignoring(StaleElementReferenceException.class)
+	                .ignoring(ElementNotVisibleException.class);
 
-			Wait<WebDriver> wait2 = new FluentWait<WebDriver>(_driver)
-					.withTimeout(1000, TimeUnit.SECONDS)
-					.pollingEvery(5, TimeUnit.SECONDS)
-					.ignoring(Exception.class)
-					.ignoring(NoSuchElementException.class)
-					.ignoring(StaleElementReferenceException.class)
-					.ignoring(ElementNotVisibleException.class);
-
-			wait2.until(new Function<WebDriver, WebElement>() 
-			{
-				public WebElement apply(WebDriver driver) {
-
-					if(element.isDisplayed()==true)
-					{
-						return element;
-
-					}else
-					{
-						return null;
-					}
-				}
-			});
-
-		}
-		catch (TimeoutException e)
-		{
-
-			e.printStackTrace();
-		}
+	        wait2.until(driver -> {
+	            if (element.isDisplayed()) {
+	                return element;
+	            } else {
+	                return null;
+	            }
+	        });
+	    } catch (TimeoutException e) {
+	        e.printStackTrace();
+	    }
 	}
+
+	
 	/// <summary>
 	/// This method use for 
 	/// wait element visible on DOM
