@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -21,29 +19,28 @@ import common_utilities.Utilities.Util;
 import initialize_scripts.InitializeTestSettings;
 
 
-public class Demo extends InitializeTestSettings
-{
-	private static final Logger logger =LoggerFactory.getLogger(Demo.class.getName());
-	
-	Util utilobj = new Util();
-	InitializeTestSettings iTS=new InitializeTestSettings();
+public class Demo extends InitializeTestSettings{
+
+private static final Logger logger =LoggerFactory.getLogger(Demo.class.getName());
+
+	Util utility = new Util();
+	InitializeTestSettings its=new InitializeTestSettings();
 	Path currentRelativePath = Paths.get(""); 
 	  String prjPath=currentRelativePath.toAbsolutePath().toString();
 	  ExcelUtility excelutil=new ExcelUtility();
 	  
-	  
-	  public List<String> sheets(String filePath) throws InvalidFormatException, IOException {
-		    try (Workbook wb = WorkbookFactory.create(new File(filePath))) {
-		        List<String> sheetNames = new ArrayList<>();
+	  public ArrayList<String> sheets() throws InvalidFormatException, IOException {
+		    ArrayList<String> sheetNames = new ArrayList<>();
+		    try (Workbook wb = WorkbookFactory.create(new File("/path/to/excel.xls"))) {
 		        for (int i = 0; i < wb.getNumberOfSheets(); i++) {
 		            sheetNames.add(wb.getSheetName(i));
 		        }
-		        return sheetNames;
-		    } catch (Exception e) {
-		        logger.error("Error retrieving sheet names: {}", e.getMessage());
-		        return Collections.emptyList();
+		    } catch (InvalidFormatException | IOException e) {
+		        throw e;
 		    }
+		    return sheetNames;
 		}
+
 	
 	public static XSSFRow test(XSSFSheet sheet, String colName, String textToFind){
 	    int colIndex=0;
@@ -59,7 +56,7 @@ public class Demo extends InitializeTestSettings
 	            return sheet.getRow(RowNum);
 	        }
 	    }
-	    
+	    logger.info("No any row found that contains {}",textToFind);
 	    return null;
 	}
 	

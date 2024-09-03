@@ -1,4 +1,4 @@
-package common_utilities.common;
+package api_utilities.api_common;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,13 +18,12 @@ import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 
-
-public class PoiReadExcel
+    public class PoiReadExcel
     {
-	
+    	
     	private static final Logger logger = Logger.getLogger(PoiReadExcel.class.getName());
 
-    	public static Map<String, ArrayList<String>> fetchWithCondition(String sheetPath, String sheetName, List<String> whereClause) {
+    	public static Map<String, ArrayList<String>> fetchWithCondition(String sheetPath, String sheetName, ArrayList<String> whereClause) {
     		Map<String, ArrayList<String>> excelMap = coreListToMap(sheetPath, sheetName);
     		for (String clause : whereClause) {
     			HashMap<String, ArrayList<String>> finalMap = new HashMap<>();
