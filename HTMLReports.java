@@ -4,13 +4,13 @@ import com.aventstack.extentreports.ExtentTest;
 
 import report_utilities.Constants.HTMLReportContants;
 import report_utilities.Constants.ReportContants;
-import report_utilities.model.ExtentModel.TestStepDetails;
-import report_utilities.model.html.HTMLTCLiveModel;
+import report_utilities.Model.ExtentModel.TestStepDetails;
+import report_utilities.Model.html.HTMLTCLiveModel;
 import report_utilities.TestResultModel.BrowserResult;
 import report_utilities.TestResultModel.ModuleResult;
 import report_utilities.TestResultModel.TestCaseResult;
 import report_utilities.common.ReportCommon;
-import report_utilities.model.TestCaseParam;
+import report_utilities.Model.TestCaseParam;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -35,8 +35,8 @@ public class HTMLReports {
 			
 			logger.info("Initial ReportPath: {}", reportPath);
 
-			reportPath = reportPath + HTMLReportContants.File_HTMLSummary;
-			String reportPath2 = reportPath + File.separator + ".." + File.separator + ".." + File.separator + ".." + HTMLReportContants.File_HTMLSummary;
+			reportPath = reportPath + HTMLReportContants.FILE_HTML_SUMMARY;
+			String reportPath2 = reportPath + File.separator + ".." + File.separator + ".." + File.separator + ".." + HTMLReportContants.FILE_HTML_SUMMARY;
 
 			logger.info("Final ReportPath: {}", reportPath);
 			logger.info("Alternate ReportPath2: {}", reportPath2);
@@ -47,12 +47,12 @@ public class HTMLReports {
 			for (ModuleResult moduleResult : ReportContants.moduleResults) {
 				String modResult = HTMLReportContants.PlaceHolder_HTMLSummary_ModuleRow;
 
-				modResult = modResult.replaceAll(HTMLReportContants.Summary_ModuleBrowser_SNO, String.valueOf(i));
-				modResult = modResult.replaceAll(HTMLReportContants.Summary_ModuleBrowser_Module, String.valueOf(moduleResult.Module));
-				modResult = modResult.replaceAll(HTMLReportContants.Summary_ModuleBrowser_TotalTC, String.valueOf(moduleResult.TCTotalCount));
-				modResult = modResult.replaceAll(HTMLReportContants.Summary_ModuleBrowser_PassedTC, String.valueOf(moduleResult.TCPassCount));
-				modResult = modResult.replaceAll(HTMLReportContants.Summary_ModuleBrowser_FailedTC, String.valueOf(moduleResult.TCFailCount));
-				modResult = modResult.replaceAll(HTMLReportContants.Summary_ModuleBrowser_SkippedTC, String.valueOf(moduleResult.TCSkippedCount));
+				modResult = modResult.replaceAll(HTMLReportContants.SUMMARY_MODULE_BROWSER_SNO, String.valueOf(i));
+				modResult = modResult.replaceAll(HTMLReportContants.SUMMARY_MODULE_BROWSER_MODULE, String.valueOf(moduleResult.Module));
+				modResult = modResult.replaceAll(HTMLReportContants.SUMMARY_MODULE_BROWSER_TOTAL_TC, String.valueOf(moduleResult.TCTotalCount));
+				modResult = modResult.replaceAll(HTMLReportContants.SUMMARY_MODULE_BROWSER_PASSED_TC, String.valueOf(moduleResult.TCPassCount));
+				modResult = modResult.replaceAll(HTMLReportContants.SUMMARY_MODULE_BROWSER_FAILED_TC, String.valueOf(moduleResult.TCFailCount));
+				modResult = modResult.replaceAll(HTMLReportContants.SUMMARY_MODULE_BROWSER_SKIPPED_TC, String.valueOf(moduleResult.TCSkippedCount));
 				sb.append(moduleResults);
 				sb.append(modResult);
 				moduleResults = sb.toString();
@@ -65,12 +65,12 @@ public class HTMLReports {
 			for (BrowserResult browserResult : ReportContants.browserResults) {
 				String brResult = HTMLReportContants.PlaceHolder_HTMLSummary_BrowserRow;
 
-				brResult = brResult.replaceAll(HTMLReportContants.Summary_ModuleBrowser_SNO, String.valueOf(i));
-				brResult = brResult.replaceAll(HTMLReportContants.Summary_ModuleBrowser_Module, String.valueOf(browserResult.Browser));
-				brResult = brResult.replaceAll(HTMLReportContants.Summary_ModuleBrowser_TotalTC, String.valueOf(browserResult.TCTotalCount));
-				brResult = brResult.replaceAll(HTMLReportContants.Summary_ModuleBrowser_PassedTC, String.valueOf(browserResult.TCPassCount));
-				brResult = brResult.replaceAll(HTMLReportContants.Summary_ModuleBrowser_FailedTC, String.valueOf(browserResult.TCFailCount));
-				brResult = brResult.replaceAll(HTMLReportContants.Summary_ModuleBrowser_SkippedTC, String.valueOf(browserResult.TCSkippedCount));
+				brResult = brResult.replaceAll(HTMLReportContants.SUMMARY_MODULE_BROWSER_SNO, String.valueOf(i));
+				brResult = brResult.replaceAll(HTMLReportContants.SUMMARY_MODULE_BROWSER_MODULE, String.valueOf(browserResult.Browser));
+				brResult = brResult.replaceAll(HTMLReportContants.SUMMARY_MODULE_BROWSER_TOTAL_TC, String.valueOf(browserResult.TCTotalCount));
+				brResult = brResult.replaceAll(HTMLReportContants.SUMMARY_MODULE_BROWSER_PASSED_TC, String.valueOf(browserResult.TCPassCount));
+				brResult = brResult.replaceAll(HTMLReportContants.SUMMARY_MODULE_BROWSER_FAILED_TC, String.valueOf(browserResult.TCFailCount));
+				brResult = brResult.replaceAll(HTMLReportContants.SUMMARY_MODULE_BROWSER_SKIPPED_TC, String.valueOf(browserResult.TCSkippedCount));
 				sbbr.append(browserResults);
 				sbbr.append(brResult);
 				browserResults = sbbr.toString();
@@ -85,15 +85,15 @@ public class HTMLReports {
 			for (TestCaseResult testCaseResult : ReportContants.testcaseResults) {
 				String tcResult = HTMLReportContants.PlaceHolder_HTMLSummary_TCRow;
 
-				tcResult = tcResult.replaceAll(HTMLReportContants.Summary_TC_SNO, String.valueOf(i));
-				tcResult = tcResult.replaceAll(HTMLReportContants.Summary_TC_TCName, testCaseResult.TestCaseName);
-				tcResult = tcResult.replaceAll(HTMLReportContants.Summary_TC_TCDesc, testCaseResult.TestCaseDescription);
-				tcResult = tcResult.replaceAll(HTMLReportContants.Summary_TC_Module, testCaseResult.Module);
-				tcResult = tcResult.replaceAll(HTMLReportContants.Summary_TC_Browser, testCaseResult.Browser);
-				tcResult = tcResult.replaceAll(HTMLReportContants.Summary_TC_Status, testCaseResult.TestCaseStatus);
-				tcResult = tcResult.replaceAll(HTMLReportContants.Summary_TC_StartTime, reportCommon.ConvertLocalDateTimetoSQLDateTime(testCaseResult.StartTime));
-				tcResult = tcResult.replaceAll(HTMLReportContants.Summary_TC_EndTime, reportCommon.ConvertLocalDateTimetoSQLDateTime(testCaseResult.EndTime));
-				tcResult = tcResult.replaceAll(HTMLReportContants.Summary_TC_Duration, reportCommon.getTimeDifference(testCaseResult.StartTime, testCaseResult.EndTime));
+				tcResult = tcResult.replaceAll(HTMLReportContants.SUMMARY_TC_SNO, String.valueOf(i));
+				tcResult = tcResult.replaceAll(HTMLReportContants.SUMMARY_TC_TC_NAME, testCaseResult.TestCaseName);
+				tcResult = tcResult.replaceAll(HTMLReportContants.SUMMARY_TC_TC_DESC, testCaseResult.TestCaseDescription);
+				tcResult = tcResult.replaceAll(HTMLReportContants.SUMMARY_TC_MODULE, testCaseResult.Module);
+				tcResult = tcResult.replaceAll(HTMLReportContants.SUMMARY_TC_BROWSER, testCaseResult.Browser);
+				tcResult = tcResult.replaceAll(HTMLReportContants.SUMMARY_TC_STATUS, testCaseResult.TestCaseStatus);
+				tcResult = tcResult.replaceAll(HTMLReportContants.SUMMARY_TC_START_TIME, reportCommon.convertLocalDateTimetoSQLDateTime(testCaseResult.StartTime));
+				tcResult = tcResult.replaceAll(HTMLReportContants.SUMMARY_TC_END_TIME, reportCommon.convertLocalDateTimetoSQLDateTime(testCaseResult.EndTime));
+				tcResult = tcResult.replaceAll(HTMLReportContants.SUMMARY_TC_DURATION, reportCommon.getTimeDifference(testCaseResult.StartTime, testCaseResult.EndTime));
 				sbtcr.append(testCaseResults);
 				sbtcr.append(tcResult);
 				testCaseResults = sbtcr.toString();
@@ -101,16 +101,16 @@ public class HTMLReports {
 			}
 
 			String hTMLResultsSummary = HTMLReportContants.PlaceHolder_HTMLSummary;
-			hTMLResultsSummary = hTMLResultsSummary.replaceAll(HTMLReportContants.Summary_DataRow_Module, moduleResults);
-			hTMLResultsSummary = hTMLResultsSummary.replaceAll(HTMLReportContants.Summary_DataRow_Browser, browserResults);
-			hTMLResultsSummary = hTMLResultsSummary.replaceAll(HTMLReportContants.Summary_DataRow_TC, testCaseResults);
+			hTMLResultsSummary = hTMLResultsSummary.replaceAll(HTMLReportContants.SUMMARY_DATA_ROW_MODULE, moduleResults);
+			hTMLResultsSummary = hTMLResultsSummary.replaceAll(HTMLReportContants.SUMMARY_DATA_ROW_BROWSER, browserResults);
+			hTMLResultsSummary = hTMLResultsSummary.replaceAll(HTMLReportContants.SUMMARY_DATA_ROW_TC, testCaseResults);
 
 			writeDataToTextFile(reportPath, hTMLResultsSummary);
 			writeDataToTextFile(reportPath2, hTMLResultsSummary);
 
-			writeDataToTextFile(HTMLReportContants.HTMLReportsDir + File.separator + HTMLReportContants.SummaryDashboard, HTMLReportContants.SummaryData_HTML);
-			writeFileLineByLine(HTMLReportContants.HTMLReportsDir + File.separator + HTMLReportContants.SummaryCSS, HTMLReportContants.SummaryData_CSS);
-			writeFileLineByLine(HTMLReportContants.HTMLReportsDir + File.separator + HTMLReportContants.SummaryJS, HTMLReportContants.HTMLSummaryData_JS);
+			writeDataToTextFile(HTMLReportContants.htmlreportsdir + File.separator + HTMLReportContants.SUMMARY_DASHBOARD, HTMLReportContants.SummaryData_HTML);
+			writeFileLineByLine(HTMLReportContants.htmlreportsdir + File.separator + HTMLReportContants.SUMMARY_CSS, HTMLReportContants.SummaryData_CSS);
+			writeFileLineByLine(HTMLReportContants.htmlreportsdir + File.separator + HTMLReportContants.SUMMARY_JS, HTMLReportContants.HTMLSummaryData_JS);
 
 		} catch (InterruptedException e) {
 		    Thread.currentThread().interrupt(); // Restore the interrupted status
@@ -129,25 +129,25 @@ public class HTMLReports {
 		{
 		
 
-		String tcDir=HTMLReportContants.HTMLReportsDir+testCase+"_"+ moduleName+ "_" + browser;
-		tCHTMLIndex=tcDir+HTMLReportContants.File_HTMLIndex;
-		tCHTMLPath=tcDir+ HTMLReportContants.File_HTMLTestCase;
+		String tcDir=HTMLReportContants.htmlreportsdir +testCase+"_"+ moduleName+ "_" + browser;
+		tCHTMLIndex=tcDir+HTMLReportContants.FILE_HTML_INDEX;
+		tCHTMLPath=tcDir+ HTMLReportContants.FILE_HTML_TEST_CASE;
 		String tCHTMLData=HTMLReportContants.PlaceHolder_HTMLTestCase;
 		
-		String tSHTMLPath=tcDir+ HTMLReportContants.File_TestStep;
+		String tSHTMLPath=tcDir+ HTMLReportContants.FILE_TEST_STEP;
 		String tSHTMLData=HTMLReportContants.PlaceHolder_TestStepPre;
 
-		String tcIndexPath=tcDir+ HTMLReportContants.File_HTMLIndex;
+		String tcIndexPath=tcDir+ HTMLReportContants.FILE_HTML_INDEX;
 		
 		File dir = new File(tcDir);
         if (!dir.exists()) dir.mkdirs();
 
-        tCHTMLData=tCHTMLData.replaceAll(HTMLReportContants.TC_Name,testCase);
-        tCHTMLData=tCHTMLData.replaceAll(HTMLReportContants.TC_Module,moduleName);
-        tCHTMLData=tCHTMLData.replaceAll(HTMLReportContants.TC_Browser,browser);
-        tCHTMLData=tCHTMLData.replaceAll(HTMLReportContants.TC_Status,"InProgress");
-        tCHTMLData=tCHTMLData.replaceAll(HTMLReportContants.PageRefreshTimeInSecondsVar,HTMLReportContants.PageRefreshTimeInSeconds);
-        tSHTMLData=tSHTMLData.replaceAll(HTMLReportContants.PageRefreshTimeInSecondsVar,HTMLReportContants.PageRefreshTimeInSeconds);
+        tCHTMLData=tCHTMLData.replaceAll(HTMLReportContants.TC_NAME,testCase);
+        tCHTMLData=tCHTMLData.replaceAll(HTMLReportContants.TC_MODULE,moduleName);
+        tCHTMLData=tCHTMLData.replaceAll(HTMLReportContants.TC_BROWSER,browser);
+        tCHTMLData=tCHTMLData.replaceAll(HTMLReportContants.TC_STATUS,"InProgress");
+        tCHTMLData=tCHTMLData.replaceAll(HTMLReportContants.PAGE_REFRESH_TIME_IN_SECONDS_VAR,HTMLReportContants.PageRefreshTimeInSeconds);
+        tSHTMLData=tSHTMLData.replaceAll(HTMLReportContants.PAGE_REFRESH_TIME_IN_SECONDS_VAR,HTMLReportContants.PageRefreshTimeInSeconds);
         
         
         writeDataToTextFile(tCHTMLPath, tCHTMLData);
@@ -174,7 +174,7 @@ public class HTMLReports {
 	{
 
 
-		String hTMLTCLiveReportFile=HTMLReportContants.HTMLReportsDir+HTMLReportContants.HTML_TCLiveReport;
+		String hTMLTCLiveReportFile=HTMLReportContants.htmlreportsdir +HTMLReportContants.HTML_TC_LIVE_REPORT;
 
 		try
 		{
@@ -195,12 +195,12 @@ public class HTMLReports {
 	public String createDashboardHTMLLiveSummary()
 	{
 
-		String hTMLTCLiveReportFile=HTMLReportContants.HTMLReportsDir +"/" + HTMLReportContants.SummaryDashboard;
+		String hTMLTCLiveReportFile=HTMLReportContants.htmlreportsdir +"/" + HTMLReportContants.SUMMARY_DASHBOARD;
 		try
 		{
-			writeDataToTextFile(HTMLReportContants.HTMLReportsDir +"/" + HTMLReportContants.SummaryDashboard , HTMLReportContants.SummaryData_HTML);
-			writeFileLineByLine(HTMLReportContants.HTMLReportsDir +"/" + HTMLReportContants.SummaryCSS , HTMLReportContants.SummaryData_CSS);
-			writeFileLineByLine(HTMLReportContants.HTMLReportsDir +"/" + HTMLReportContants.SummaryJS , HTMLReportContants.HTMLSummaryData_JS);
+			writeDataToTextFile(HTMLReportContants.htmlreportsdir +"/" + HTMLReportContants.SUMMARY_DASHBOARD, HTMLReportContants.SummaryData_HTML);
+			writeFileLineByLine(HTMLReportContants.htmlreportsdir +"/" + HTMLReportContants.SUMMARY_CSS, HTMLReportContants.SummaryData_CSS);
+			writeFileLineByLine(HTMLReportContants.htmlreportsdir +"/" + HTMLReportContants.SUMMARY_JS, HTMLReportContants.HTMLSummaryData_JS);
 
 			logger.info("<a href='file:///{}'> Live Dashboard</a>", hTMLTCLiveReportFile);
 		}
@@ -218,12 +218,12 @@ public class HTMLReports {
 		{
 		
 	    StringBuilder sb = new StringBuilder();
-		String hTMLTCLiveReportFile=HTMLReportContants.HTMLReportsDir+HTMLReportContants.HTML_TCLiveReport;
+		String hTMLTCLiveReportFile=HTMLReportContants.htmlreportsdir +HTMLReportContants.HTML_TC_LIVE_REPORT;
 		
 		String tCHTMLLiveReport=HTMLReportContants.PlaceHolder_HTMLTCLiveTemplate;
 
-		tCHTMLLiveReport=tCHTMLLiveReport.replaceAll(HTMLReportContants.PageRefreshTimeInSecondsVar,HTMLReportContants.PageRefreshTimeInSeconds);
-		tCHTMLLiveReport=tCHTMLLiveReport.replaceAll(HTMLReportContants.PageRefreshTimeInSecondsVar,HTMLReportContants.PageRefreshTimeInSeconds);
+		tCHTMLLiveReport=tCHTMLLiveReport.replaceAll(HTMLReportContants.PAGE_REFRESH_TIME_IN_SECONDS_VAR,HTMLReportContants.PageRefreshTimeInSeconds);
+		tCHTMLLiveReport=tCHTMLLiveReport.replaceAll(HTMLReportContants.PAGE_REFRESH_TIME_IN_SECONDS_VAR,HTMLReportContants.PageRefreshTimeInSeconds);
 
 		
 		ReportContants.htmlTCLiveModels.add(new HTMLTCLiveModel().AddData_HTMLTCLiveModel(testCase, moduleName, browser, status, tcFilePath));
@@ -233,12 +233,12 @@ public class HTMLReports {
 		for(HTMLTCLiveModel htmltcLiveModel: ReportContants.htmlTCLiveModels)
 		{
 			String hTMLTCLiveRow=HTMLReportContants.PlaceHolder_HTMLTCLiveRow;
-			hTMLTCLiveRow=hTMLTCLiveRow.replace(HTMLReportContants.TCLive_TCName , htmltcLiveModel.TestCase);
-			hTMLTCLiveRow=hTMLTCLiveRow.replace(HTMLReportContants.TCLive_Module , htmltcLiveModel.Module);
-			hTMLTCLiveRow=hTMLTCLiveRow.replace(HTMLReportContants.TCLive_Browser , htmltcLiveModel.Browser);
-			hTMLTCLiveRow=hTMLTCLiveRow.replace(HTMLReportContants.TCLive_Status , htmltcLiveModel.Status);
+			hTMLTCLiveRow=hTMLTCLiveRow.replace(HTMLReportContants.TC_LIVE_TC_NAME, htmltcLiveModel.TestCase);
+			hTMLTCLiveRow=hTMLTCLiveRow.replace(HTMLReportContants.TC_LIVE_MODULE, htmltcLiveModel.Module);
+			hTMLTCLiveRow=hTMLTCLiveRow.replace(HTMLReportContants.TC_LIVE_BROWSER, htmltcLiveModel.Browser);
+			hTMLTCLiveRow=hTMLTCLiveRow.replace(HTMLReportContants.TC_LIVE_STATUS, htmltcLiveModel.Status);
 			htmltcLiveModel.FilePath = (htmltcLiveModel.FilePath.split("HTMLReports")[1]).substring(1);
-			hTMLTCLiveRow=hTMLTCLiveRow.replace(HTMLReportContants.TCLive_FilePath , htmltcLiveModel.FilePath);
+			hTMLTCLiveRow=hTMLTCLiveRow.replace(HTMLReportContants.TC_LIVE_FILE_PATH, htmltcLiveModel.FilePath);
 			sb.append(tCHTMLLiveReport);
 			sb.append(hTMLTCLiveRow);
 			tCHTMLLiveReport = sb.toString();	
@@ -263,11 +263,11 @@ public class HTMLReports {
 		{
 		
 	    StringBuilder sb = new StringBuilder();
-		String hTMLTCLiveReportFile=HTMLReportContants.HTMLReportsDir+HTMLReportContants.HTML_TCLiveReport;
+		String hTMLTCLiveReportFile=HTMLReportContants.htmlreportsdir +HTMLReportContants.HTML_TC_LIVE_REPORT;
 		
 		String tCHTMLLiveReport=HTMLReportContants.PlaceHolder_HTMLTCLiveTemplate;
-		tCHTMLLiveReport=tCHTMLLiveReport.replaceAll(HTMLReportContants.PageRefreshTimeInSecondsVar,HTMLReportContants.PageRefreshTimeInSeconds);
-		tCHTMLLiveReport=tCHTMLLiveReport.replaceAll(HTMLReportContants.PageRefreshTimeInSecondsVar,HTMLReportContants.PageRefreshTimeInSeconds);
+		tCHTMLLiveReport=tCHTMLLiveReport.replaceAll(HTMLReportContants.PAGE_REFRESH_TIME_IN_SECONDS_VAR,HTMLReportContants.PageRefreshTimeInSeconds);
+		tCHTMLLiveReport=tCHTMLLiveReport.replaceAll(HTMLReportContants.PAGE_REFRESH_TIME_IN_SECONDS_VAR,HTMLReportContants.PageRefreshTimeInSeconds);
 
 
 		
@@ -284,11 +284,11 @@ public class HTMLReports {
 		for(HTMLTCLiveModel htmltcLiveModel: ReportContants.htmlTCLiveModels)
 		{
 			String hTMLTCLiveRow=HTMLReportContants.PlaceHolder_HTMLTCLiveRow;
-			hTMLTCLiveRow=hTMLTCLiveRow.replace(HTMLReportContants.TCLive_TCName , htmltcLiveModel.TestCase);
-			hTMLTCLiveRow=hTMLTCLiveRow.replace(HTMLReportContants.TCLive_Module , htmltcLiveModel.Module);
-			hTMLTCLiveRow=hTMLTCLiveRow.replace(HTMLReportContants.TCLive_Browser , htmltcLiveModel.Browser);
-			hTMLTCLiveRow=hTMLTCLiveRow.replace(HTMLReportContants.TCLive_Status , htmltcLiveModel.Status);
-			hTMLTCLiveRow=hTMLTCLiveRow.replace(HTMLReportContants.TCLive_FilePath , htmltcLiveModel.FilePath);
+			hTMLTCLiveRow=hTMLTCLiveRow.replace(HTMLReportContants.TC_LIVE_TC_NAME, htmltcLiveModel.TestCase);
+			hTMLTCLiveRow=hTMLTCLiveRow.replace(HTMLReportContants.TC_LIVE_MODULE, htmltcLiveModel.Module);
+			hTMLTCLiveRow=hTMLTCLiveRow.replace(HTMLReportContants.TC_LIVE_BROWSER, htmltcLiveModel.Browser);
+			hTMLTCLiveRow=hTMLTCLiveRow.replace(HTMLReportContants.TC_LIVE_STATUS, htmltcLiveModel.Status);
+			hTMLTCLiveRow=hTMLTCLiveRow.replace(HTMLReportContants.TC_LIVE_FILE_PATH, htmltcLiveModel.FilePath);
 			sb.append(tCHTMLLiveReport);
 			sb.append(hTMLTCLiveRow);
 			tCHTMLLiveReport = sb.toString();
@@ -312,45 +312,45 @@ public class HTMLReports {
 
 		try
 		{
-			String tCDir=HTMLReportContants.HTMLReportsDir+testCaseParam.TestCaseName +"_"+ testCaseParam.ModuleName+ "_" + testCaseParam.Browser;
-			String sCHTMLPath=tCDir+ HTMLReportContants.File_ScreenShot;
+			String tCDir=HTMLReportContants.htmlreportsdir +testCaseParam.TestCaseName +"_"+ testCaseParam.ModuleName+ "_" + testCaseParam.Browser;
+			String sCHTMLPath=tCDir+ HTMLReportContants.FILE_SCREEN_SHOT;
 			String sCHTMLData=HTMLReportContants.PlaceHolder_ScreenShot;
 			
-			String tSHTMLPath=tCDir+ HTMLReportContants.File_TestStep;
+			String tSHTMLPath=tCDir+ HTMLReportContants.FILE_TEST_STEP;
 			String tSHTMLData=HTMLReportContants.PlaceHolder_CurrentTestStep;
 		
 
-			sCHTMLData=sCHTMLData.replaceAll(HTMLReportContants.Scr_StepName,tsDetails.StepName);
-			sCHTMLData=sCHTMLData.replaceAll(HTMLReportContants.PageRefreshTimeInSecondsVar,HTMLReportContants.PageRefreshTimeInSeconds);
+			sCHTMLData=sCHTMLData.replaceAll(HTMLReportContants.SCR_STEP_NAME,tsDetails.StepName);
+			sCHTMLData=sCHTMLData.replaceAll(HTMLReportContants.PAGE_REFRESH_TIME_IN_SECONDS_VAR,HTMLReportContants.PageRefreshTimeInSeconds);
 
 			
 	        writeDataToTextFile(sCHTMLPath, sCHTMLData);
 			
-	        tSHTMLData=tSHTMLData.replaceAll(HTMLReportContants.TS_StepName,tsDetails.StepName);
-	        tSHTMLData=tSHTMLData.replaceAll(HTMLReportContants.TS_StepDesc,tsDetails.StepDescription);
-	        tSHTMLData=tSHTMLData.replaceAll(HTMLReportContants.TS_Status,tsDetails.testCaseStatus);
+	        tSHTMLData=tSHTMLData.replaceAll(HTMLReportContants.TS_STEP_NAME,tsDetails.StepName);
+	        tSHTMLData=tSHTMLData.replaceAll(HTMLReportContants.TS_STEP_DESC,tsDetails.StepDescription);
+	        tSHTMLData=tSHTMLData.replaceAll(HTMLReportContants.TS_STATUS,tsDetails.testCaseStatus);
 	        if(tsDetails.ScreenShotData.equals(""))
 	        {
-	        tSHTMLData=tSHTMLData.replaceAll(HTMLReportContants.TS_Screenshot,"N/A");
+	        tSHTMLData=tSHTMLData.replaceAll(HTMLReportContants.tsScreenshot,"N/A");
 	        }
 	        else
 	        {
 	        	
 	        	String scrLink=writeImageToReport(tsDetails.ScreenShotData,"Screenshot");
 	        	
-		        tSHTMLData=tSHTMLData.replaceAll(HTMLReportContants.TS_Screenshot,scrLink);	
+		        tSHTMLData=tSHTMLData.replaceAll(HTMLReportContants.tsScreenshot,scrLink);
 		        String dele = "/";
-		        String screenshotPath=tCDir+ dele + HTMLReportContants.File_ScreenShotImage;
+		        String screenshotPath=tCDir+ dele + HTMLReportContants.FILE_SCREEN_SHOT_IMAGE;
 		        copyFileUsingStream(tsDetails.ScreenShotData, screenshotPath);
 		        
 	        }
 	        
 	        ReportCommon reportCommon =new ReportCommon();
 	        
-	        tSHTMLData=tSHTMLData.replace(HTMLReportContants.TS_StartTime,reportCommon.ConvertLocalDateTimetoSQLDateTime(tsDetails.StartTime));
-	        tSHTMLData=tSHTMLData.replace(HTMLReportContants.TS_EndTime,reportCommon.ConvertLocalDateTimetoSQLDateTime(tsDetails.EndTime));
+	        tSHTMLData=tSHTMLData.replace(HTMLReportContants.TS_START_TIME,reportCommon.convertLocalDateTimetoSQLDateTime(tsDetails.StartTime));
+	        tSHTMLData=tSHTMLData.replace(HTMLReportContants.TS_END_TIME,reportCommon.convertLocalDateTimetoSQLDateTime(tsDetails.EndTime));
 	        
-	        tSHTMLData=tSHTMLData.replaceAll(HTMLReportContants.TS_Duration,reportCommon.getTimeDifference(tsDetails.StartTime,tsDetails.EndTime));
+	        tSHTMLData=tSHTMLData.replaceAll(HTMLReportContants.TS_DURATION,reportCommon.getTimeDifference(tsDetails.StartTime,tsDetails.EndTime));
 			
 	        appendDataToTextFile(tSHTMLPath, tSHTMLData);
 		}
@@ -476,4 +476,3 @@ public class HTMLReports {
 	    }
 	}
 }
-
