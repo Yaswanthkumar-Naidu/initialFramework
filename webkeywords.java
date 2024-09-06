@@ -6,23 +6,22 @@ import org.openqa.selenium.support.ui.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import report_utilities.Model.TestCaseParam;
-import report_utilities.Model.ExtentModel.ExtentUtilities;
-import report_utilities.Model.ExtentModel.PageDetails;
 import report_utilities.common.ReportCommon;
 import report_utilities.common.ScreenshotCommon;
+import report_utilities.model.TestCaseParam;
+import report_utilities.extent_model.ExtentUtilities;
+import report_utilities.extent_model.PageDetails;
 
-import java.time.Duration;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 
 
-public class webkeywords
+public class Webkeywords
 {
 	private static final String LOG_SWITCHED_TO = "Switched to: {}";
 
@@ -33,53 +32,49 @@ public class webkeywords
 		SELECT_BY_VALUE,
 	}
 
-	private static final webkeywords _instance = new webkeywords();
-	private static final Logger logger =LoggerFactory.getLogger(webkeywords.class.getName());
-	private static final String Status_Pass="PASS";
-	private static final String Status_Fail="FAIL";
-	private static final String Status_Done="DONE";
+	private static final Webkeywords INSTANCE = new Webkeywords();
+	private static final Logger logger =LoggerFactory.getLogger(Webkeywords.class.getName());
+	private static final String STATUSPASS="PASS";
+	private static final String STATUSFAIL="FAIL";
+	private static final String STATUSDONE="DONE";
+	private static final String  VRIFYELEMENT= "Verify Element Displayed--";
+	private static final String EMPTYTEXTMSG="Textbox is empty. Retrying...";
+	private static final String TABLECOLUMNMSG= "Table Columns Text Displayed-->";
 	ExtentUtilities extentUtilities = new ExtentUtilities();
-	ScreenshotCommon SCM = new ScreenshotCommon();
+	ScreenshotCommon scm = new ScreenshotCommon();
 
-	ReportCommon TestStepDetails = new ReportCommon();
+	ReportCommon testStepDetails = new ReportCommon();
 	ReportCommon exceptionDetails = new ReportCommon();
 	
-	public static webkeywords Instance()
+	public static Webkeywords instance()
 	{
 
-		return _instance;
+		return INSTANCE;
 
 	}
-	/// <summary>
-	/// This method is use for 
-	/// navigate to URL
-	/// User can use param with Uri Ex: /home/contact
-	/// </summary>
-	/// <param name="url"></param>
-	public void Navigate(WebDriver driver, String url, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	
+	public void navigate(WebDriver driver, String url, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
-		String action_nv = "Navigate -> "+url;
-		String actionDescription_nv = "";
+		String actionNv = "Navigate -> "+url;
+		String actionDescriptionNv = "";
 		LocalDateTime startTime=  LocalDateTime.now();
 
 		try
 		{
 
-			logger.info("Url = " + url);
+			logger.info("Url = {}",url);
 			if (!(url.startsWith("http://") || url.startsWith("https://")))
-				throw new Exception("URL is invalid format and cannot open page");
-			driver.navigate().to(url);
-			LocalDateTime EndTime =  LocalDateTime.now();
-			//TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,"PASS");
-			TestStepDetails.logTestStepDetails(driver, testCaseParam, action_nv, actionDescription_nv,pageDetails, startTime, Status_Done);
-			logger.info("Successfully Navigated to " + url);
+				driver.navigate().to(url);
+			
+			testStepDetails.logTestStepDetails(driver, testCaseParam, actionNv, actionDescriptionNv,pageDetails, startTime, STATUSDONE);
+			logger.info("Successfully Navigated to {} ",url);
 
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + action_nv + actionDescription_nv);
-			TestStepDetails.logExceptionDetails(driver, testCaseParam, action_nv, actionDescription_nv, startTime,e);
-			TestStepDetails.logTestStepDetails(driver, testCaseParam, action_nv, actionDescription_nv,pageDetails, startTime, Status_Fail);
+			logger.error("Failed ==> {} {}",actionNv,actionDescriptionNv);
+			testStepDetails.logExceptionDetails(driver, testCaseParam, actionNv, actionDescriptionNv, startTime,e);
+			testStepDetails.logTestStepDetails(driver, testCaseParam, actionNv, actionDescriptionNv,pageDetails, startTime, STATUSFAIL);
 
 			throw e;
 		}
@@ -87,60 +82,44 @@ public class webkeywords
 
 	}
 
-
-	/// <summary>
-	/// This method will naviagte to URL 
-	/// It require param with exactly in URL format 
-	/// Ex: https://github.com/minhhoangvn http://github.com/minhhoangvn
-	/// </summary>
-	/// <param name="url"></param>
-	public void OpenUrl(WebDriver _driver, String url, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public void openUrl(WebDriver drivernew, String url, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
-		String Action = "Navigate -->"+url ;
-		String ActionDescription = "";
-		LocalDateTime StartTime=  LocalDateTime.now();
+		String action = "Navigate -->"+url ;
+		String actionDescription = "";
+		LocalDateTime startTime=  LocalDateTime.now();
 		try
 		{
 
-			logger.info("Url = " + url);
+			logger.info("Url = {}" , url);
 			if (!(url.startsWith("http://") || url.startsWith("https://")))
-				throw new Exception("URL is invalid format and cannot open page");
-			_driver.navigate().to(url);
+				drivernew.navigate().to(url);
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
+			logger.error("Failed ==> {} {} " , action , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
+			testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 			throw e;
 		}
 	}
-	/// <summary>
-	/// This method is use for
-	/// select option from dropdown list or combobox
-	/// </summary>
-	/// <param name="element"></param>
-	/// <param name="type"></param>
-	/// <param name="options"></param>
-	public void Select(WebDriver _driver, WebElement element, SelectType type, String options, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	
+	public void select(WebDriver drivernew, WebElement element, SelectType type, String options, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
 
-		String Action = "Select dropdown Value:"+options;
-		String ActionDescription = "Select dropdown Value:-"+options;
-		LocalDateTime StartTime=  LocalDateTime.now();
+		String action = "Select dropdown Value:"+options;
+		String actionDescription = "Select dropdown Value:-"+options;
+		LocalDateTime startTime=  LocalDateTime.now();
 
 		try
 		{
 
-			logger.info("Option = " + options);
+			logger.info("Option = {}" ,options);
 
 			switch (type)
 			{
 			case SELECT_BY_INDEX:
-				try
-				{
-
-
-					if (options.equals("N//A") || options.equals("N/A") || options.equals("n//a") || options.equals("n/a") ) 
+				
+					if (checkOptions(options) ) 
 					{
 						break;
 					}					
@@ -148,48 +127,39 @@ public class webkeywords
 					else
 					{
 
-						webkeywords.Instance().FluentWait(_driver,element);
-						scrollIntoViewElement(_driver, element);
-						if(element.isEnabled()==true) 
+						Webkeywords.instance().fluentWait(drivernew,element);
+						scrollIntoViewElement(drivernew, element);
+						if(element.isEnabled()) 
 						{
-							Action = "Selected Value:-"+options;
-							ActionDescription = "Selected Value:-"+options;
+							action = "Selected Value:-"+options;
+							actionDescription = "Selected Value:-"+options;
 							Select select = new Select(element);
 							select.selectByIndex(Integer.parseInt(options));
-							TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
+							testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 						}
 
 					}
 
-				}
-				catch (Exception e)
-				{
-					logger.error("Failed ==> " + Action + ActionDescription);
-					TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
-					TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
-
-					throw e;
-				}
-
+				
 				break;
 			case SELECT_BY_TEXT:
 
-				if (options.equals("N//A") || options.equals("N/A") || options.equals("n//a") || options.equals("n/a") ) 
+				if (checkOptions(options) ) 
 				{
 					break;
 				}
 				else
 				{
-					webkeywords.Instance().FluentWait(_driver, element);
-					scrollIntoViewElement(_driver, element);
-					if(element.isEnabled()==true && element.isDisplayed()==true) 
+					Webkeywords.instance().fluentWait(drivernew, element);
+					scrollIntoViewElement(drivernew, element);
+					if(element.isEnabled() && element.isDisplayed()) 
 					{
-						Action = "Selected Value:-"+options;
-						ActionDescription = "Selected Value:-"+options;
+						action = "Selected Value:-"+options;
+						actionDescription = "Selected Value:-"+options;
 						Select select1 = new Select(element);
 						select1.selectByVisibleText(options);
-						TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
-						//VerifyValueSelected(_driver, element,options,testCaseParam,pageDetails);
+						testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
+						
 					}
 
 
@@ -197,63 +167,47 @@ public class webkeywords
 				break;
 			case SELECT_BY_VALUE:
 
-				webkeywords.Instance().FluentWait(_driver, element);
-				scrollIntoViewElement(_driver, element);
-				//WebKeywords.Instance().WaitElementToBeClickablenew(_driver, element, 5000);
+				Webkeywords.instance().fluentWait(drivernew, element);
+				scrollIntoViewElement(drivernew, element);
 				Select select2 = new Select(element);
 				select2.selectByValue(options);
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 
-				VerifyValueSelected(_driver, element,options,testCaseParam,pageDetails);
-Thread.sleep(100);				break;
+				verifyValueSelected(drivernew, element,options,testCaseParam,pageDetails);
+				Thread.sleep(100);			
+				break;
 			default:
-				throw new Exception("Get error in using Selected");
+				
 			}
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
-			TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
-
-			throw e;
+			logger.error("Failed ==>{} {} ", action , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
+			testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 		}
 	}
 
-	public void trymultipleclick(WebDriver _driver, WebElement element, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	private boolean checkOptions(String options) {
+		return options.equals("N//A") || options.equals("N/A") || options.equals("n//a") || options.equals("n/a");
+	}
+
+	public void trymultipleclick(WebDriver drivernew, WebElement element, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
-		webkeywords.Instance().FluentWait(_driver, element);
-		String Action="";
-		try 
-		{
+		Webkeywords.instance().fluentWait(drivernew, element);
+		String action="";
+		action = getaction(drivernew, element, testCaseParam, pageDetails);
 
-			if(!getLocatorFromWebElement(element,_driver,testCaseParam,pageDetails).toString().equals(null)) 
-			{ 
-				Action = "Click --> "+getLocatorFromWebElement(element,_driver,testCaseParam,pageDetails).toString();
-			} 
-			else
-
-			{
-				Action = "Click --> "+getLocatorFromWebElement(element,_driver,testCaseParam,pageDetails).toString();
-			}
-
-		}
-		catch(Exception e) 
-		{
-			Action = "Click --> "+getLocatorFromWebElement(element,_driver,testCaseParam,pageDetails).toString();
-		}
-
-		String ActionDescription = element.toString();
-		LocalDateTime StartTime=  LocalDateTime.now();
+		String actionDescription = element.toString();
+		LocalDateTime startTime=  LocalDateTime.now();
 
 
 		try
-		{
-			//WebKeywords.Instance().WaitElementClickable(_driver, element);	
-			Actions _action = new Actions(_driver);
-			_action.moveToElement(element).build().perform(); 
+		{	
+			Actions actionnew = new Actions(drivernew);
+			actionnew.moveToElement(element).build().perform(); 
 			element.click();
-			TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
+			testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 
 
 		}
@@ -261,12 +215,11 @@ Thread.sleep(100);				break;
 		{
 			try
 			{
-				//By locatorvalue=getLocatortypeandvalue(element,_driver);
-				//WebDriverWait wait = new WebDriverWait(_driver, 10000);
-				Actions _action = new Actions(_driver);
-				_action.moveToElement(element).build().perform(); 
+				
+				Actions actionnew = new Actions(drivernew);
+				actionnew.moveToElement(element).build().perform(); 
 				element.click();
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 
 
 			}
@@ -275,38 +228,26 @@ Thread.sleep(100);				break;
 			{
 				try
 				{
-					//By locatorvalue=getLocatortypeandvalue(element,_driver);
-					//WebDriverWait wait = new WebDriverWait(_driver, 10000);
-					Actions _action = new Actions(_driver);
-					_action.moveToElement(element).build().perform(); 
+					
+					Actions actionnew = new Actions(drivernew);
+					actionnew.moveToElement(element).build().perform(); 
 					element.click();
-					TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
+					testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 
-					/*
-					 * WaitwebElementVisible(_driver, element,200);
-					 * 
-					 * ((JavascriptExecutor)_driver).executeScript("arguments[0].click()",element);
-					 */
-
+					
 				}
 
 				catch(Exception exx) 
 				{
 					try
 					{
-						//WebKeywords.Instance().WaitElementClickable(_driver, element);	
-						//By locatorvalue=getLocatortypeandvalue(element,_driver);
-						//WebDriverWait wait = new WebDriverWait(_driver, 10000);
-						Actions _action = new Actions(_driver);
-						_action.moveToElement(element).build().perform(); 
+						
+						Actions actionnew = new Actions(drivernew);
+						actionnew.moveToElement(element).build().perform(); 
 						element.click();
-						TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
+						testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 
-						/*
-						 * WaitwebElementVisible(_driver, element,200);
-						 * 
-						 * ((JavascriptExecutor)_driver).executeScript("arguments[0].click()",element);
-						 */
+						
 
 					}
 
@@ -314,10 +255,10 @@ Thread.sleep(100);				break;
 					{
 						try
 						{
-								Actions _action = new Actions(_driver);
-							_action.moveToElement(element).build().perform(); 
+								Actions actionnew = new Actions(drivernew);
+							actionnew.moveToElement(element).build().perform(); 
 							element.click();
-							TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
+							testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 
 
 
@@ -325,26 +266,8 @@ Thread.sleep(100);				break;
 
 						catch(Exception exxxx) 
 						{
-							try
-							{
-								Actions _action = new Actions(_driver);
-								_action.moveToElement(element).build().perform(); 
-								element.click();
-								TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
-
-
-
-							}
-
-							catch(Exception exp) 
-							{
-								logger.error("Failed ==> " + Action + ActionDescription);
-								TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,exp);
-								TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
-
-								throw e;
-
-							}
+							handleActionExc(drivernew, element, testCaseParam, pageDetails, action, actionDescription,
+									startTime);
 
 						}
 
@@ -353,133 +276,76 @@ Thread.sleep(100);				break;
 				}
 
 			}
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
-			TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+			logger.error("Failed ==> {} {}" , action , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
+			testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 
 			throw e;
 		}
 	}
 
-	/// <summary>
-	/// This method use for 
-	/// click 
-	/// </summary>
-	/// <param name="element"></param>
-/*	public void Click(WebDriver _driver, WebElement element, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
-	{
-		String Action="";
-		//Thread.sleep(100);
-		WebKeywords.Instance().FluentWait(_driver, element);
-		WebKeywords.Instance().WaitElementforelementclickable(_driver, element, 1000);
-		ScrollIntoViewElement(_driver, element);
-		String ActionDescription = element.toString();
-		LocalDateTime StartTime=  LocalDateTime.now();
-		
+	private void handleActionExc(WebDriver drivernew, WebElement element, TestCaseParam testCaseParam,
+			PageDetails pageDetails, String action, String actionDescription, LocalDateTime startTime) throws IOException
+			 {
+		try
+		{
+			Actions actionnew = new Actions(drivernew);
+			actionnew.moveToElement(element).build().perform(); 
+			element.click();
+			testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
+
+
+
+		}
+
+		catch(Exception exp) 
+		{
+			logger.error("Failed ==> {} {}" , action , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,exp);
+			testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
+
+	
+
+		}
+	}
+
+	private String getaction(WebDriver drivernew, WebElement element, TestCaseParam testCaseParam,
+			PageDetails pageDetails) throws IOException {
+		String action;
 		try 
 		{
-
-			if(!getLocatorFromWebElement(element,_driver,testCaseParam,pageDetails).toString().equals(null)) 
-			{ 
-				Action = "Click --> "+getLocatorFromWebElement(element,_driver,testCaseParam,pageDetails).toString();
-				ActionDescription = "Click --> "+getLocatorFromWebElement(element,_driver,testCaseParam,pageDetails).toString();
-			} 
-			else
-
-			{
-				Action = "Click --> "+getLocatorFromWebElement(element,_driver,testCaseParam,pageDetails).toString();
-				ActionDescription = "Click --> "+getLocatorFromWebElement(element,_driver,testCaseParam,pageDetails).toString();
-
-			}
-
+			action = "Click --> "+getLocatorFromWebElement(element,drivernew,testCaseParam,pageDetails);
 		}
 		catch(Exception e) 
 		{
-			Action = "Click --> "+getLocatorFromWebElement(element,_driver,testCaseParam,pageDetails).toString();
-			ActionDescription = "Click --> "+getLocatorFromWebElement(element,_driver,testCaseParam,pageDetails).toString();
-
-		} 
-
-		
-		try
-			{		
-				Thread.sleep(300);
-				JavascriptExecutor executor = (JavascriptExecutor)_driver;
-				executor.executeScript("arguments[0].scrollIntoView(true);", element);
-				Thread.sleep(300);
-				executor.executeScript("arguments[0].click();", element);
-
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Pass);
-				Thread.sleep(900);
-
-			}
-			catch (Exception e)
-			{
-				try 
-				{
-					WebKeywords.Instance().WaitElementforelementclickable(_driver, element, 1000);
-					JavascriptExecutor executor = (JavascriptExecutor)_driver;
-					executor.executeScript("arguments[0].scrollIntoView(true);", element);
-					Thread.sleep(300);
-					executor.executeScript("arguments[0].click();", element);
-
-					TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
-
-				}
-				catch(Exception f) 
-				{
-					logger.error("Failed ==> " + Action + ActionDescription);
-					TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
-					TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
-
-					throw e;
-				}
-
-			}
-		
+			action = "Click --> "+getLocatorFromWebElement(element,drivernew,testCaseParam,pageDetails);
+		}
+		return action;
 	}
-*/
 
-	/// <summary>
-	/// This method use for 
-	/// click 
-	/// </summary>
-	/// <param name="element"></param>
-	//Captures the performance metrics 
-	public void Click(WebDriver _driver, WebElement element,String TestData, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public void click(WebDriver drivernew, WebElement element,String testData, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException, InterruptedException 
 	{
-		String Action="";
+		String action="";
 
-		if((TestData.equalsIgnoreCase("n/a")==false)||(TestData.equalsIgnoreCase("n\\a"))==false||(TestData.equalsIgnoreCase("n\\\\a"))==false)
+		if(!(testData.equalsIgnoreCase("n/a"))||!(testData.equalsIgnoreCase("n\\a"))||!(testData.equalsIgnoreCase("n\\\\a")))
 		{
-		webkeywords.Instance().FluentWait(_driver, element);
-		webkeywords.Instance().WaitElementforelementclickable(_driver, element, 1000);
-		scrollIntoViewElement(_driver, element);
-		String ActionDescription = element.toString();
-		LocalDateTime StartTime=  LocalDateTime.now();
-		String Xpath= getLocatorFromWebElement(element,_driver,testCaseParam,pageDetails);
+		Webkeywords.instance().fluentWait(drivernew, element);
+		Webkeywords.instance().waitElementforelementclickable(drivernew, element, 1000);
+		scrollIntoViewElement(drivernew, element);
+		String actionDescription = element.toString();
+		LocalDateTime startTime=  LocalDateTime.now();
+		getLocatorFromWebElement(element,drivernew,testCaseParam,pageDetails);
 		
 		try 
 		{
-
-			if(!getLocatorFromWebElement(element,_driver,testCaseParam,pageDetails).toString().equals(null)) 
-			{ 
-				Action = "Click --> "+getLocatorFromWebElement(element,_driver,testCaseParam,pageDetails).toString();
-				ActionDescription = "Click --> "+getLocatorFromWebElement(element,_driver,testCaseParam,pageDetails).toString();
-			} 
-			else
-
-			{
-				Action = "Click --> "+getLocatorFromWebElement(element,_driver,testCaseParam,pageDetails).toString();
-				ActionDescription = "Click --> "+getLocatorFromWebElement(element,_driver,testCaseParam,pageDetails).toString();
-
-			}
+			action = "Click --> "+getLocatorFromWebElement(element,drivernew,testCaseParam,pageDetails);
+			actionDescription = "Click --> "+getLocatorFromWebElement(element,drivernew,testCaseParam,pageDetails);
 	
 		}
 		catch(Exception e) 
 		{
-			Action = "Click --> "+getLocatorFromWebElement(element,_driver,testCaseParam,pageDetails).toString();
-			ActionDescription = "Click --> "+getLocatorFromWebElement(element,_driver,testCaseParam,pageDetails).toString();
+			action = "Click --> "+getLocatorFromWebElement(element,drivernew,testCaseParam,pageDetails);
+			actionDescription = "Click --> "+getLocatorFromWebElement(element,drivernew,testCaseParam,pageDetails);
 
 		} 
 
@@ -488,13 +354,13 @@ Thread.sleep(100);				break;
 			try
 			{		
 				
-				Actions _action = new Actions(_driver);
-				_action.moveToElement(element).build().perform();
+				Actions actionnew = new Actions(drivernew);
+				actionnew.moveToElement(element).build().perform();
 
 				element.click();
 
 
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Pass);
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSPASS);
 				Thread.sleep(900);
 
 
@@ -503,112 +369,91 @@ Thread.sleep(100);				break;
 			{
 				try 
 				{
-					webkeywords.Instance().WaitElementforelementclickable(_driver, element, 1000);
-					JavascriptExecutor executor = (JavascriptExecutor)_driver;
+					Webkeywords.instance().waitElementforelementclickable(drivernew, element, 1000);
+					JavascriptExecutor executor = (JavascriptExecutor)drivernew;
 					executor.executeScript("arguments[0].scrollIntoView(true);", element);
 					Thread.sleep(300);
 					executor.executeScript("arguments[0].click();", element);
 
-					TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
+					testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 
 				}
 				catch(Exception f) 
 				{
-					logger.error("Failed ==> " + Action + ActionDescription);
-					TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
-					TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+					logger.error("Failed ==> {} {}" , action , actionDescription);
+					testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
+					testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 
 					throw e;
 				}
 
 			}
-			//break;
-		//}
+			
 		}
 	}
 
 
-	public void Clickwithaction(WebDriver _driver, WebElement element, TestCaseParam testCaseParam,PageDetails pageDetails,String TestData) throws Exception
+	public void clickwithaction(WebDriver drivernew, WebElement element, TestCaseParam testCaseParam,PageDetails pageDetails,String testData)
 	{
 
-		//Thread.sleep(100);
-		String Action="";
-		String ActionDescription = element.toString();
-		LocalDateTime StartTime=  LocalDateTime.now();
-		if((TestData.equalsIgnoreCase("n/a")==false)||(TestData.equalsIgnoreCase("n\\a"))==false||(TestData.equalsIgnoreCase("n\\\\a"))==false)
+		String action="";
+		String actionDescription="";
+		LocalDateTime startTime=  LocalDateTime.now();
+		if(!(testData.equalsIgnoreCase("n/a"))||!(testData.equalsIgnoreCase("n\\a"))||!(testData.equalsIgnoreCase("n\\\\a")))
 		{
 		try {
 
-			try 
-			{
-				webkeywords.Instance().FluentWait(_driver, element);
-				webkeywords.Instance().WaitElementforelementclickable(_driver, element, 1000);
-				scrollIntoViewElement(_driver, element);
+			
+				Webkeywords.instance().fluentWait(drivernew, element);
+				Webkeywords.instance().waitElementforelementclickable(drivernew, element, 1000);
+				scrollIntoViewElement(drivernew, element);
+				action = "Click --> "+getLocatorFromWebElement(element,drivernew,testCaseParam,pageDetails);
+				actionDescription = "Click --> "+getLocatorFromWebElement(element,drivernew,testCaseParam,pageDetails);
 
-				if(!getLocatorFromWebElement(element,_driver,testCaseParam,pageDetails).toString().equals(null)) 
-				{ 
-					Action = "Click --> "+getLocatorFromWebElement(element,_driver,testCaseParam,pageDetails).toString();
-					ActionDescription = "Click --> "+getLocatorFromWebElement(element,_driver,testCaseParam,pageDetails).toString();
-				} 
-				else
-
-				{
-					Action = "Click --> "+getLocatorFromWebElement(element,_driver,testCaseParam,pageDetails).toString();
-					ActionDescription = "Click --> "+getLocatorFromWebElement(element,_driver,testCaseParam,pageDetails).toString();
-
-				}
-
-			}
-			catch(Exception e) 
-			{
-				Action = "Click --> "+getLocatorFromWebElement(element,_driver,testCaseParam,pageDetails).toString();
-				ActionDescription = "Click --> "+getLocatorFromWebElement(element,_driver,testCaseParam,pageDetails).toString();
-
-			} 
-
-
-
-			try
-			{		
-				Actions _action = new Actions(_driver);
-				_action.moveToElement(element).build().perform();
-
-				element.click();
-
-
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
-				Thread.sleep(900);
-
-			}
-			catch (Exception e)
-			{
-
-				logger.error("Failed ==> " + Action + ActionDescription);
-				TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
-
-				throw e;
-
-
-			}
+			tryAction(drivernew, element, testCaseParam, pageDetails, action, actionDescription, startTime);
 
 		}
 		catch(Exception e)
 		{
-			throw e;
+			logger.error("Failed ==> {} {}" , action , actionDescription);
 		}
 		}
 	}
 
-	public void Wait_ElementtobeVisible(WebDriver _driver, String Xpath, int TimeOut) throws Exception {
+	private void tryAction(WebDriver drivernew, WebElement element, TestCaseParam testCaseParam,
+			PageDetails pageDetails, String action, String actionDescription, LocalDateTime startTime) throws IOException
+			 {
+		try
+		{		
+			Actions actionnew = new Actions(drivernew);
+			actionnew.moveToElement(element).build().perform();
+
+			element.click();
+
+
+			testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
+			Thread.sleep(900);
+
+		}
+		catch (Exception e)
+		{
+
+			logger.error("Failed ==>{} {} " ,action , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
+			testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
+
+		}
+	}
+
+	public void waitElementtobeVisible(WebDriver drivernew, String xpath, int timeOut)  {
 		int count = 0;
 		int maxTries = 5;
 		while (count < maxTries) {
 			try {
-				WebDriverWait wait = new WebDriverWait(_driver, TimeOut);
-				boolean elementpresent = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(Xpath)))
+				WebDriverWait wait = new WebDriverWait(drivernew, timeOut);
+				boolean elementpresent = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpath)))
 						.isDisplayed();
-				if ((elementpresent) == true) {
+				if ((elementpresent)) {
 					break;
 				}
 			} catch (Exception e) {
@@ -623,35 +468,35 @@ Thread.sleep(100);				break;
 
 
 
-	public void ClickWithoutwait(WebDriver _driver, WebElement element, TestCaseParam testCaseParam,PageDetails pageDetails,String TestData) throws Exception
+	public void clickWithoutwait(WebDriver drivernew, WebElement element, TestCaseParam testCaseParam,PageDetails pageDetails,String testData) throws InterruptedException, IOException 
 	{
-		String Action="";
+		String action="";
 		Thread.sleep(100);
-		String ActionDescription = element.toString();
-		LocalDateTime StartTime=  LocalDateTime.now();
-		if((TestData.equalsIgnoreCase("n/a")==false)||(TestData.equalsIgnoreCase("n\\a"))==false||(TestData.equalsIgnoreCase("n\\\\a"))==false)
+		String actionDescription = "";
+		LocalDateTime startTime=  LocalDateTime.now();
+		if(!(testData.equalsIgnoreCase("n/a"))||!(testData.equalsIgnoreCase("n\\a"))||!(testData.equalsIgnoreCase("n\\\\a")))
 		{
 		try 
 		{
 
-			if(!getLocatorFromWebElement(element,_driver,testCaseParam,pageDetails).toString().equals(null)) 
+			if(getLocatorFromWebElement(element,drivernew,testCaseParam,pageDetails)!=null)
 			{ 
-				Action = "Click --> "+getLocatorFromWebElement(element,_driver,testCaseParam,pageDetails).toString();
-				ActionDescription = "Click --> "+getLocatorFromWebElement(element,_driver,testCaseParam,pageDetails).toString();
+				action = "Click --> "+getLocatorFromWebElement(element,drivernew,testCaseParam,pageDetails);
+				actionDescription = "Click --> "+getLocatorFromWebElement(element,drivernew,testCaseParam,pageDetails);
 			} 
 			else
 
 			{
-				Action = "Click --> "+getLocatorFromWebElement(element,_driver,testCaseParam,pageDetails).toString();
-				ActionDescription = "Click --> "+getLocatorFromWebElement(element,_driver,testCaseParam,pageDetails).toString();
+				action = "Click --> "+getLocatorFromWebElement(element,drivernew,testCaseParam,pageDetails);
+				actionDescription = "Click --> "+getLocatorFromWebElement(element,drivernew,testCaseParam,pageDetails);
 
 			}
 
 		}
 		catch(Exception e) 
 		{
-			Action = "Click --> "+getLocatorFromWebElement(element,_driver,testCaseParam,pageDetails).toString();
-			ActionDescription = "Click --> "+getLocatorFromWebElement(element,_driver,testCaseParam,pageDetails).toString();
+			action = "Click --> "+getLocatorFromWebElement(element,drivernew,testCaseParam,pageDetails);
+			actionDescription = "Click --> "+getLocatorFromWebElement(element,drivernew,testCaseParam,pageDetails);
 
 		} 
 
@@ -662,10 +507,10 @@ Thread.sleep(100);				break;
 		{		
 
 
-			JavascriptExecutor executor = (JavascriptExecutor)_driver;
+			JavascriptExecutor executor = (JavascriptExecutor)drivernew;
 			executor.executeScript("arguments[0].click();", element);
 
-			TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
+			testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 			Thread.sleep(900);
 
 		}
@@ -673,31 +518,29 @@ Thread.sleep(100);				break;
 		{
 			try 
 			{
-				JavascriptExecutor executor = (JavascriptExecutor)_driver;
+				JavascriptExecutor executor = (JavascriptExecutor)drivernew;
 				executor.executeScript("arguments[0].click();", element);
 
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 
 			}
 			catch(Exception f) 
 			{
-				logger.error("Failed ==> " + Action + ActionDescription);
-				TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
-
-				throw e;
+				logger.error("Failed ==> {} {}" , action , actionDescription);
+				testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 			}
 
 		}
 		}
 	}
-	public void waitElementToBeVisible(WebDriver _driver, WebElement element, int timeOut) throws Exception {
+	public void waitElementToBeVisibleNew(WebDriver drivernew, WebElement element, int timeOut) throws InterruptedException {
 		int count = 0;
 		int maxTries = 5;
 		while (count < maxTries) {
 			try {
-				By locatorvalue = getLocatorvalue(element, _driver);
-				WebDriverWait wait = new WebDriverWait(_driver, timeOut);
+				By locatorvalue = getLocatorvalue(element, drivernew);
+				WebDriverWait wait = new WebDriverWait(drivernew, timeOut);
 				wait.until(ExpectedConditions.presenceOfElementLocated(locatorvalue));
 				break;
 			} catch (Exception e) {
@@ -710,15 +553,15 @@ Thread.sleep(100);				break;
 		}
 	}
 
-	public void waitForElementToBeVisible(WebDriver _driver, String ElementID) throws Exception {
+	public void waitForElementToBeVisible(WebDriver drivernew, String elementId) throws InterruptedException  {
 		int count = 0;
 		int maxTries = 5;
 		int timeOut=3000;
 		while (count < maxTries) {
 			try {
-				WebElement element=_driver.findElement(By.xpath(ElementID));
-				By locatorvalue = getLocatorvalue(element, _driver);
-				WebDriverWait wait = new WebDriverWait(_driver, timeOut);
+				WebElement element=drivernew.findElement(By.xpath(elementId));
+				By locatorvalue = getLocatorvalue(element, drivernew);
+				WebDriverWait wait = new WebDriverWait(drivernew, timeOut);
 				wait.until(ExpectedConditions.presenceOfElementLocated(locatorvalue));
 				break;
 			} catch (Exception e) {
@@ -732,127 +575,125 @@ Thread.sleep(100);				break;
 	}
 
 
-	public String getLocatorFromWebElement(WebElement element,WebDriver _driver,TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public String getLocatorFromWebElement(WebElement element,WebDriver drivernew,TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
 
 		String locatoroutput= element.toString().split("->")[1].replaceFirst("(?s)(.*)\\]", "$1" + "");
-		String[] Splitlocator=locatoroutput.split(": ");
-		Splitlocator[0].replaceAll("\\s", "");	    
-		Splitlocator[1].replaceAll("\\s", "");
+		String[] splitlocator=locatoroutput.split(": ");
+		splitlocator[0] =splitlocator[0].replaceAll("\\s", "");	    
+		splitlocator[1] =splitlocator[1].replaceAll("\\s", "");
 
-		String text=getElementText(_driver, Splitlocator[0],Splitlocator[1],  testCaseParam,pageDetails);
+		getElementText(drivernew, splitlocator[0],splitlocator[1],  testCaseParam,pageDetails);
 
-		return text;
+		return getElementText(drivernew, splitlocator[0],splitlocator[1],  testCaseParam,pageDetails);
 	}
 
-	public void Hovermousetoelement(WebDriver _driver,WebElement element,TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public void hovermousetoelement(WebDriver drivernew,WebElement element,TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
+		String action = "Navigate -> ";
+		String actionDescription = "";
+		LocalDateTime startTime=  LocalDateTime.now();
 		try 
 		{
 			Thread.sleep(1000);
-			Actions action = new Actions(_driver);
+			Actions actionnew = new Actions(drivernew);
 
-			action.moveToElement(element).perform();
+			actionnew.moveToElement(element).perform();
 		}
 		catch(Exception e) 
 		{
-			throw e;
+			logger.error("Failed ==> {} {} " , action , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
+            testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
+			
 		}
 	}
-	public void SwitchtoFrame(WebDriver _driver, WebElement element, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public void switchtoFrame(WebDriver drivernew, WebElement element, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException
 	{
-		String Action = "Navigate -> ";
-		String ActionDescription = "";
-		LocalDateTime StartTime=  LocalDateTime.now();
+		String action = "Navigate -> ";
+		String actionDescription = "";
+		LocalDateTime startTime=  LocalDateTime.now();
 		try
 		{
 
-			_driver.switchTo().frame(element);
-			TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
+			drivernew.switchTo().frame(element);
+			testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
+			logger.error("Failed ==> {} {} " , action , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
 			throw e;
 		}
 	}
 
-	public void switchToWindowByTitle(WebDriver _driver, String title, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public void switchToWindowByTitle(WebDriver drivernew, String title, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException, InterruptedException 
 	{
-		String Action = "Navigate -> ";
-		String ActionDescription = "";
-		LocalDateTime StartTime=  LocalDateTime.now();
-		try
-		{
+		String action = "Navigate -> ";
+		String actionDescription = "";
+		LocalDateTime startTime=  LocalDateTime.now();
+		
 			Thread.sleep(2000);
-			Set<String> windows=_driver.getWindowHandles();
+			Set<String> windows=drivernew.getWindowHandles();
 
 
 			for (String handle: windows)
 			{
 
-				String myTitle = _driver.switchTo().window(handle).getTitle();
-				// now apply the condition - moving to the window with blank title
+				String myTitle = drivernew.switchTo().window(handle).getTitle();
 				if (myTitle.equals(title))
 				{
 
-					_driver.switchTo().window(handle);
+					drivernew.switchTo().window(handle);
 					logger.info("switched to Window--> {}",title);
+					testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 					Thread.sleep(0);
 					break;
 				}
 				else
 				{
-					try
-					{
-						_driver.switchTo().window(handle);
-						logger.info("switched to main Window");
-					}
-					catch (Exception e)
-					{
-						logger.info("Unable to switch to Main Window");
-					}
+					switchToWindowHandle(drivernew, handle);
 				}
 
 
-
-
-
 			}
-		}
-		catch (Exception e)
-		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
-			throw e;
-		}
+		
 	}
 
-
-	public void Refresh(WebDriver _driver, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
-	{
-		String Action = "Refresh the page ";
-		String ActionDescription = "";
-		LocalDateTime StartTime=  LocalDateTime.now();
+	private void switchToWindowHandle(WebDriver drivernew, String handle) {
 		try
 		{
-			_driver.navigate().refresh();
-			TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
+			drivernew.switchTo().window(handle);
+			logger.info("switched to main Window");
+		}
+		catch (Exception e)
+		{
+			logger.info("Unable to switch to Main Window");
+		}
+	}
+
+
+	public void refresh(WebDriver drivernew, TestCaseParam testCaseParam,PageDetails pageDetails) 
+	{
+		String action = "Refresh the page ";
+		String actionDescription = "";
+		LocalDateTime startTime=  LocalDateTime.now();
+		try
+		{
+			drivernew.navigate().refresh();
+			testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
-			TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+			logger.error("Failed ==> {} {}" , action , actionDescription);
+			
 
-			throw e;
 		}
 	}
 
-	public boolean FindElementBool(WebDriver _driver, By by, TestCaseParam testCaseParam, int... timeOut)
+	public boolean findElementBool(WebDriver drivernew, By by, TestCaseParam testCaseParam, int... timeOut)
 	{
 		if(timeOut==null)
 		{
@@ -862,79 +703,76 @@ Thread.sleep(100);				break;
 		boolean found = false;
 		try
 		{
-			WaitElementVisible(_driver, by, timeOut[0]);
+			waitElementVisible(drivernew, by, timeOut[0]);
 			found = true;
 		}
 		catch (Exception e)
 		{
 			found = false;
 		}
-		logger.info(by + "found = " + found);
+		logger.info("{} found = {}", by, found);
 		return found;
 	}
 
-	public void ZoombackToOriginal(WebDriver _driver, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public void zoombackToOriginal(WebDriver drivernew, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
-		String Action = "Navigate -> ";
-		String ActionDescription = "";
-		LocalDateTime StartTime=  LocalDateTime.now();
+		String action = "Navigate -> ";
+		String actionDescription = "";
+		LocalDateTime startTime=  LocalDateTime.now();
 		try
 		{
 
 
-			JavascriptExecutor js = (JavascriptExecutor)_driver;
+			JavascriptExecutor js = (JavascriptExecutor)drivernew;
 
 			js.executeScript("document.body.style.zoom='100%'");
 
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
+			logger.error("Failed ==> {} {}" ,action ,actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
+			testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 			throw e;
 		}
 	}
 
-	public void JSClick(WebDriver _driver, WebElement element, TestCaseParam testCaseParam,PageDetails pageDetails, int... timeOut) throws Exception
+	public void jsClick(WebDriver drivernew, WebElement element, TestCaseParam testCaseParam,PageDetails pageDetails, int... timeOut) throws IOException 
 	{
 		if(timeOut==null)
 		{
 			timeOut[0]=60;
 		}
 
-		String Action = "Navigate -> ";
-		String ActionDescription = "";
-		LocalDateTime StartTime=  LocalDateTime.now();
+		String action = "Navigate -> ";
+		String actionDescription = "";
+		LocalDateTime startTime=  LocalDateTime.now();
 		try
 		{
 
-			WebDriverWait wait = new WebDriverWait(_driver, timeOut[0]);
-
-
-			JavascriptExecutor js = (JavascriptExecutor)_driver;
+			
+			JavascriptExecutor js = (JavascriptExecutor)drivernew;
 			js.executeScript("arguments[0].click();", element);
 
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
+			logger.error("Failed ==> {} {} " ,action ,actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
+			testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 			throw e;
 		}
 	}
 
 
-	public void ClickRadioButton(WebDriver _driver, TestCaseParam testCaseParam, WebElement element) throws Exception
+	public void clickRadioButton(WebDriver driver, TestCaseParam testCaseParam, WebElement element) throws IOException 
 	{
-		String Action = "Navigate -> ";
-		String ActionDescription = "";
-		LocalDateTime StartTime=  LocalDateTime.now();
+		String action = "Navigate -> ";
+		String actionDescription = "";
+		LocalDateTime startTime=  LocalDateTime.now();
 		try
 		{
 
-			/*							WebDriverWait wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(15));
-		wait.until(ExpectedConditions.elementToBeClickable(element));
-			 */
 			for (int i = 0; i < 10; i++)
 			{
 				element.click();
@@ -950,37 +788,27 @@ Thread.sleep(100);				break;
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
+			logger.error("Failed ==> {} {}" ,action, actionDescription);
+			testStepDetails.logExceptionDetails(driver, testCaseParam, action, actionDescription, startTime,e);
 			throw e;
 		}
 	}
 
-	/// <summary>
-	/// This method user for 
-	/// enter text 
-	/// </summary>
-	/// <param name="element"></param>
-	/// <param name="text"></param>
-	public void SetText(WebDriver _driver, WebElement element, String text, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	
+	public void setText(WebDriver drivernew, WebElement element, String text, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
-		String Action = "Entered Text -> "+ text;
-		String ActionDescription = "Entered Text -> "+ text;;
+		String action = "Entered Text -> "+ text;
+		String actionDescription = "Entered Text -> "+ text;
 
-		LocalDateTime StartTime=  LocalDateTime.now();
+		LocalDateTime startTime=  LocalDateTime.now();
 
 		try
 		{
 
-			if(text.equalsIgnoreCase("N/A")|| text.equalsIgnoreCase("N//A"))
+			if(!textCheck(text))
 			{
-
-			}
-
-			else
-			{
-				webkeywords.Instance().FluentWait(_driver, element);
-				WebDriverWait wait = new WebDriverWait(_driver, 1000);
+				Webkeywords.instance().fluentWait(drivernew, element);
+				WebDriverWait wait = new WebDriverWait(drivernew, 1000);
 				wait.until(ExpectedConditions.elementToBeClickable(element));				
 				element.clear();
 				element.sendKeys(text);
@@ -990,91 +818,99 @@ Thread.sleep(100);				break;
 					
 					String textBoxValue=element.getAttribute("value");
 					String textBoxtest=element.getText();
-					 if (textBoxValue.matches("^[a-zA-Z0-9]+$")||textBoxtest.matches("^[a-zA-Z0-9]+$")) 
-					 {
-						 isDataFilled = true;
-					 }
-				        // Check if the value is alphabetical
-				        else if (textBoxValue.matches("^[a-zA-Z]+$")||textBoxtest.matches("^[a-zA-Z]+$")) 
-				        {
-				        	isDataFilled = true;
-				        }
-				        else if (textBoxValue.matches("^[a-z A-Z]+$")||textBoxtest.matches("^[a-z A-Z]+$")) 
-				        {
-				        	isDataFilled = true;
-				        }
-				        // Check if the value is numeric
-				        else if (textBoxValue.matches("^[0-9]+$")||textBoxtest.matches("^[0-9]+$")) 
-				        {
-				        	isDataFilled = true;
-				        }
-				        else if (textBoxValue.matches("^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[@#$%^&+=/-_]).+$")||textBoxtest.matches("^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[@#$%^&+=/_-]).+$")) {
-				        	isDataFilled = true;				        }
-				        // Check if the value is a combination of numeric and special characters
-				        else if (textBoxValue.matches("^(?=.*[0-9])(?=.*[@#$%^&+=/-_]).+$")||textBoxtest.matches("^(?=.*[0-9])(?=.*[@#$%^&+=/-_]).+$")) {
-				        	isDataFilled = true;				        }
-				        // Check if the value is a combination of alphabet and special characters
-				        else if (textBoxValue.matches("^(?=.*[a-zA-Z])(?=.*[@#$%^&+=/-_]).+$")||textBoxtest.matches("^(?=.*[a-zA-Z])(?=.*[@#$%^&+=/-_]).+$")) {
-				        	isDataFilled = true;
-				        	}
-					 
-				        else if (textBoxValue.matches("^(?=.*[@#$!%^&+=-]).+$")||textBoxtest.matches("^(?=.*[@#$!%^&+=-]).+$")) {
-				        	isDataFilled = true;
-				        	}
-				       
-
-		            else 
-		            {
-		            	
-		               logger.info("Textbox is empty. Retrying...");
-		                element.clear();
-
-						
-						JavascriptExecutor jsExecutor = (JavascriptExecutor) _driver;
-			            jsExecutor.executeScript("arguments[0].value = arguments[1]", element, text);
-		            }
+					 isDataFilled = validateTextBoxValue(drivernew, element, text, isDataFilled, textBoxValue,
+							textBoxtest);
 		        }
 
-				LocalDateTime endTime =  LocalDateTime.now();
+				logger.info("Successfully Entered Text {} to {}" ,text , element);
 
-				logger.info("Successfully Entered Text" + text + "to " + element);
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
-
-				VerifyValueEntered(_driver, element,text,testCaseParam,pageDetails);
+				verifyValueEntered(drivernew, element,text,testCaseParam,pageDetails);
 				Thread.sleep(0);
 			}
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
-			TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+			logger.error("Failed ==> {} {} " ,action ,actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
+			testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 
-			throw e;
 		}
 
 	}
+
+	private boolean validateTextBoxValue(WebDriver drivernew, WebElement element, String text, boolean isDataFilled,
+			String textBoxValue, String textBoxtest) {
+		if (checktextboxExpression(textBoxValue, textBoxtest)) 
+		 {
+			 isDataFilled = true;
+		 }
+		   
+		    else if (checkTestboxValue(textBoxValue, textBoxtest)) 
+		    {
+		    	isDataFilled = true;
+		    }
+		    else if (textBoxValue.matches("^[a-z A-Z]+$")||textBoxtest.matches("^[a-z A-Z]+$")) 
+		    {
+		    	isDataFilled = true;
+		    }
+		    
+		    else if (checktextboxtestExp(textBoxValue, textBoxtest)) 
+		    {
+		    	isDataFilled = true;
+		    }
+		    else if (textBoxValue.matches("^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[@#$%^&+=/-_]).+$")||textBoxtest.matches("^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[@#$%^&+=/_-]).+$")) {
+		    	isDataFilled = true;				        }
+		    
+		    else if (textBoxValue.matches("^(?=.*\\d)(?=.*[@#$%^&+=/-_]).+$")||textBoxtest.matches("^(?=.*\\d)(?=.*[@#$%^&+=/-_]).+$")) {
+		    	isDataFilled = true;				        }
+		    
+		    else if (checkTextBoxRegularExp(textBoxValue, textBoxtest)) {
+		    	isDataFilled = true;
+		    	}
+		 
+		    else if (textBoxValue.matches("^(?=.*[@#$!%^&+=-]).+$")||textBoxtest.matches("^(?=.*[@#$!%^&+=-]).+$")) {
+		    	isDataFilled = true;
+		    	}
+		   
+
+		else 
+		{
+			
+		   logger.info(EMPTYTEXTMSG);
+		    element.clear();
+
+			
+			JavascriptExecutor jsExecutor = (JavascriptExecutor) drivernew;
+		    jsExecutor.executeScript("arguments[0].value = arguments[1]", element, text);
+		}
+		return isDataFilled;
+	}
+
+	private boolean checktextboxtestExp(String textBoxValue, String textBoxtest) {
+		
+		return textBoxValue.matches("\\d")||textBoxtest.matches("\\d");
+	}
+
+	private boolean checktextboxExpression(String textBoxValue, String textBoxtest) {
+		return textBoxValue.matches("^[a-zA-Z0-9]+$")||textBoxtest.matches("^[a-zA-Z0-9]+$");
+	}
 	
-	public void SetText_MultipleRetry(WebDriver driver, WebElement element, String text, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public void setTextMultipleRetry(WebDriver driver, WebElement element, String text, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
-		String Action = "Entered Text -> "+ text;
-		String ActionDescription = "Entered Text -> "+ text;;
+		String action = "Entered Text -> "+ text;
+		String actionDescription = "Entered Text -> "+ text;
 
 		LocalDateTime startTime=  LocalDateTime.now();
 
 		try
 		{
 
-			if(text.equalsIgnoreCase("N/A")|| text.equalsIgnoreCase("N//A"))
+			if(!checkIfTrue(text))
 			{
 
-			}
-
-			
-			else
-			{
-				webkeywords.Instance().FluentWait(driver, element);
+				Webkeywords.instance().fluentWait(driver, element);
 				WebDriverWait wait = new WebDriverWait(driver, 1000);
 				wait.until(ExpectedConditions.elementToBeClickable(element));				
 				element.clear();
@@ -1086,27 +922,27 @@ Thread.sleep(100);				break;
 					
 					String textBoxValue=element.getAttribute("value");
 					String textBoxtest=element.getText();
-					 if (textBoxValue.matches("^[a-zA-Z0-9]+$")||textBoxtest.matches("^[a-zA-Z0-9]+$")) 
+					 if (checktextboxExpression(textBoxValue, textBoxtest)) 
 					 {
 						 isDataFilled = true;
 					 }
-				        // Check if the value is alphabetical
-				        else if (textBoxValue.matches("^[a-zA-Z]+$")||textBoxtest.matches("^[a-zA-Z]+$")) 
+				    
+				        else if (checkTestboxValue(textBoxValue, textBoxtest)) 
 				        {
 				        	isDataFilled = true;
 				        }
-				        // Check if the value is numeric
-				        else if (textBoxValue.matches("^[0-9]+$")||textBoxtest.matches("^[0-9]+$")) 
+				     
+				        else if (checktextboxtestExp(textBoxValue, textBoxtest)) 
 				        {
 				        	isDataFilled = true;
 				        }
-				        else if (textBoxValue.matches("^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[@#$%^&+=/-_]).+$")||textBoxtest.matches("^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[@#$%^&+=/_-]).+$")) {
+				        else if (textBoxValue.matches("^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[@#$%^&+=/-_]).+$")||textBoxtest.matches("^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[@#$%^&+=/_-]).+$")) {
 				        	isDataFilled = true;				        }
-				        // Check if the value is a combination of numeric and special characters
-				        else if (textBoxValue.matches("^(?=.*[0-9])(?=.*[@#$%^&+=/-_]).+$")||textBoxtest.matches("^(?=.*[0-9])(?=.*[@#$%^&+=/-_]).+$")) {
+				      
+				        else if (textBoxValue.matches("^(?=.*\\d)(?=.*[@#$%^&+=/-_]).+$")||textBoxtest.matches("^(?=.*\\d)(?=.*[@#$%^&+=/-_]).+$")) {
 				        	isDataFilled = true;				        }
-				        // Check if the value is a combination of alphabet and special characters
-				        else if (textBoxValue.matches("^(?=.*[a-zA-Z])(?=.*[@#$%^&+=/-_]).+$")||textBoxtest.matches("^(?=.*[a-zA-Z])(?=.*[@#$%^&+=/-_]).+$")) {
+				      
+				        else if (checkTextBoxRegularExp(textBoxValue, textBoxtest)) {
 				        	isDataFilled = true;
 				        	}
 				       
@@ -1114,7 +950,7 @@ Thread.sleep(100);				break;
 		            else 
 		            {
 		            	
-		               logger.info("Textbox is empty. Retrying...");
+		               logger.info(EMPTYTEXTMSG);
 		                element.clear();
 
 						
@@ -1123,42 +959,40 @@ Thread.sleep(100);				break;
 		            }
 		        }
 
-				logger.info("Successfully Entered Text" + text + "to " + element);
-				TestStepDetails.logTestStepDetails(driver, testCaseParam, Action, ActionDescription,pageDetails, startTime, Status_Done);
-				VerifyValueEntered(driver, element,text,testCaseParam,pageDetails);
+				logger.info("Successfully Entered Text {} to {}" ,text ,element);
+				testStepDetails.logTestStepDetails(driver, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
+				verifyValueEntered(driver, element,text,testCaseParam,pageDetails);
 				Thread.sleep(0);
 			}
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(driver, testCaseParam, Action, ActionDescription, startTime,e);
-			TestStepDetails.logTestStepDetails(driver, testCaseParam, Action, ActionDescription,pageDetails, startTime, Status_Fail);
+			logger.error("Failed ==> {} {}" ,action ,actionDescription);
+			testStepDetails.logExceptionDetails(driver, testCaseParam, action, actionDescription, startTime,e);
+			testStepDetails.logTestStepDetails(driver, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 
-			throw e;
 		}
 
 	}
 
-	public void SetTextwithoutverification(WebDriver _driver, WebElement element, String text, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	private boolean checkIfTrue(String text) {
+		return text.equalsIgnoreCase("N/A")|| text.equalsIgnoreCase("N//A");
+	}
+
+	public void setTextwithoutverification(WebDriver drivernew, WebElement element, String text, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException, InterruptedException 
 	{
-		String Action = "Entered Text -> "+ text;
-		String ActionDescription = "Entered Text -> "+ text;;
+		String action = "Entered Text -> "+ text;
+		String actionDescription = "Entered Text -> "+ text;
 
-		LocalDateTime StartTime=  LocalDateTime.now();
+		LocalDateTime startTime=  LocalDateTime.now();
 
-		try
-		{
+		
 
-			if(text.equalsIgnoreCase("N/A")|| text.equalsIgnoreCase("N//A"))
+			if(!textCheck(text))
 			{
 
-			}
-
-			else
-			{
-				webkeywords.Instance().FluentWait(_driver, element);
-				WebDriverWait wait = new WebDriverWait(_driver, 1000);
+				Webkeywords.instance().fluentWait(drivernew, element);
+				WebDriverWait wait = new WebDriverWait(drivernew, 1000);
 				wait.until(ExpectedConditions.elementToBeClickable(element));				
 				element.clear();
 				element.sendKeys(text);
@@ -1169,27 +1003,27 @@ Thread.sleep(100);				break;
 					
 					String textBoxValue=element.getAttribute("value");
 					String textBoxtest=element.getText();
-					 if (textBoxValue.matches("^[a-zA-Z0-9]+$")||textBoxtest.matches("^[a-zA-Z0-9]+$")) 
+					 if (checktextboxExpression(textBoxValue, textBoxtest)) 
 					 {
 						 isDataFilled = true;
 					 }
-				        // Check if the value is alphabetical
-				        else if (textBoxValue.matches("^[a-zA-Z]+$")||textBoxtest.matches("^[a-zA-Z]+$")) 
+				        
+				        else if (checkTestboxValue(textBoxValue, textBoxtest)) 
 				        {
 				        	isDataFilled = true;
 				        }
-				        // Check if the value is numeric
-				        else if (textBoxValue.matches("^[0-9]+$")||textBoxtest.matches("^[0-9]+$")) 
+				        
+				        else if (checktextboxtestExp(textBoxValue, textBoxtest)) 
 				        {
 				        	isDataFilled = true;
 				        }
-				        else if (textBoxValue.matches("^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[@#$%^&+=/-_]).+$")||textBoxtest.matches("^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[@#$%^&+=/_-]).+$")) {
+				        else if (textBoxValue.matches("^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[@#$%^&+=/-_]).+$")||textBoxtest.matches("^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[@#$%^&+=/_-]).+$")) {
 				        	isDataFilled = true;				        }
-				        // Check if the value is a combination of numeric and special characters
-				        else if (textBoxValue.matches("^(?=.*[0-9])(?=.*[@#$%^&+=/-_]).+$")||textBoxtest.matches("^(?=.*[0-9])(?=.*[@#$%^&+=/-_]).+$")) {
+				       
+				        else if (textBoxValue.matches("^(?=.*\\d)(?=.*[@#$%^&+=/-_]).+$")||textBoxtest.matches("^(?=.*\\d)(?=.*[@#$%^&+=/-_]).+$")) {
 				        	isDataFilled = true;				        }
-				        // Check if the value is a combination of alphabet and special characters
-				        else if (textBoxValue.matches("^(?=.*[a-zA-Z])(?=.*[@#$%^&+=/-_]).+$")||textBoxtest.matches("^(?=.*[a-zA-Z])(?=.*[@#$%^&+=/-_]).+$")) {
+				       
+				        else if (checkTextBoxRegularExp(textBoxValue, textBoxtest)) {
 				        	isDataFilled = true;
 				        	}
 				        
@@ -1198,70 +1032,74 @@ Thread.sleep(100);				break;
 		            else 
 		            {
 		            	
-		                logger.info("Textbox is empty. Retrying...");
+		                logger.info(EMPTYTEXTMSG);
 		                element.clear();
-						//element.sendKeys(text);
 						
-						JavascriptExecutor jsExecutor = (JavascriptExecutor) _driver;
+						
+						JavascriptExecutor jsExecutor = (JavascriptExecutor) drivernew;
 			            jsExecutor.executeScript("arguments[0].value = arguments[1]", element, text);
 		            }
 		        }
 
 
 
-				LocalDateTime EndTime =  LocalDateTime.now();
+				
 
-				logger.info("Successfully Entered Text" + text + "to " + element);
+				logger.info("Successfully Entered Text {} to {}" ,text ,element);
 
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 
 				Thread.sleep(0);
 			}
-		}
-		catch (Exception e)
-		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
-			TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
-
-			throw e;
-		}
+		
 
 	}
 
+	private boolean checkTextBoxRegularExp(String textBoxValue, String textBoxtest) {
+		return textBoxValue.matches("^(?=.*[a-zA-Z])(?=.*[@#$%^&+=/-_]).+$")||textBoxtest.matches("^(?=.*[a-zA-Z])(?=.*[@#$%^&+=/-_]).+$");
+	}
 
-	public void JSSetText(WebDriver _driver, WebElement element, String text, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	private boolean checkTestboxValue(String textBoxValue, String textBoxtest) {
+		return textBoxValue.matches("^[a-zA-Z]+$")||textBoxtest.matches("^[a-zA-Z]+$");
+	}
+
+	private boolean textCheck(String text) {
+		return text.equalsIgnoreCase("N/A")|| text.equalsIgnoreCase("N//A");
+	}
+
+
+	public void jsSetText(WebDriver drivernew, WebElement element, String text, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
-		String Action = "Navigate -> ";
-		String ActionDescription = "";
-		LocalDateTime StartTime=  LocalDateTime.now();
-
-
+	
+		LocalDateTime startTime=  LocalDateTime.now();
+		String action= "";
+		String actionDescription = "";
+		
 		try
 		{
-			waitweb_ElementVisible(_driver, element,200);
+			waitwebElementVisible(drivernew, element,200);
 
-			 JavascriptExecutor js = (JavascriptExecutor)_driver;
+			 JavascriptExecutor js = (JavascriptExecutor)drivernew;
 
 			 js.executeScript("arguments[0].setAttribute('value','" + text + "');", element);
 		}
-		catch (WebDriverException e)
-		{
-			throw new Exception("Element is not enable for set text" + "\r\n" + "error: " + e.getMessage());
-		}
+		
 
 		catch (Exception e)
 		{
-			throw new Exception("Element is not enable for set text" + "\r\n" + "error: " + e.getMessage() + e.getStackTrace());
+			logger.error("Failed ==> {} {}" , action , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
+			testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 		}
 
 	}
 
-	public String JSGetText(WebDriver _driver, WebElement element, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public String jsGetText(WebDriver drivernew, WebElement element, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
-		String Action = "Navigate -> ";
-		String ActionDescription = "";
-		LocalDateTime StartTime=  LocalDateTime.now();
+		String action = "Navigate -> ";
+		String actionDescription = "";
+		LocalDateTime startTime=  LocalDateTime.now();
+		
 		String webText = "";
 
 		try
@@ -1269,104 +1107,93 @@ Thread.sleep(100);				break;
 			webText = element.getText().trim();
 
 		}
-		catch (WebDriverException e)
+				catch (Exception e)
 		{
-			throw new Exception("Element is not enable for get text" + "\r\n" + "error: " + e.getMessage());
-		}
-
-		catch (Exception e)
-		{
-			throw new Exception("Element is not enable for get text" + "\r\n" + "error: " + e.getMessage() +  e.getStackTrace());
+			logger.error("Failed ==> {} {}" , action , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
+			testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
+			
+			
+			
 		}
 		return webText;
 
 	}
 
-	public void Submit(WebDriver _driver, WebElement element, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public void submit(WebDriver drivernew, WebElement element, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
-		String Action = "Navigate -> ";
-		String ActionDescription = "";
-		LocalDateTime StartTime=  LocalDateTime.now();
+		String action = "Navigate -> ";
+		String actionDescription = "";
+		LocalDateTime startTime=  LocalDateTime.now();
 		try
 		{
-			waitweb_ElementVisible(_driver, element,200);
+			waitwebElementVisible(drivernew, element,200);
 			element.submit();
-			LocalDateTime EndTime =  LocalDateTime.now();
-			logger.info("Successfully Clicked Button ==>" + element);
+			
+			logger.info("Successfully Clicked Button ==> {}" ,element);
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
+			logger.error("Failed ==> {} {}" , action , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
+			testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 			throw e;
 		}
 
 	}
 
-	/// <summary>
-	/// This method user for 
-	/// enter text 
-	/// </summary>
-	/// <param name="element"></param>
-	/// <param name="text"></param>
-	public void SetDate(WebDriver _driver, WebElement element, String text, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public void setDate(WebDriver drivernew, WebElement element, String text, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
 
-		String Action = "Navigate -> ";
-		String ActionDescription = "";
-		LocalDateTime StartTime=  LocalDateTime.now();
+		String action = "Navigate -> ";
+		String actionDescription = "";
+		LocalDateTime startTime=  LocalDateTime.now();
 		try
 
 
 		{
-			String ID = element.getAttribute("ID");
-			((JavascriptExecutor)_driver).executeScript("document.getElementById('" + ID + "').removeAttribute('readonly',0);");
+			String id = element.getAttribute("ID");
+			((JavascriptExecutor)drivernew).executeScript("document.getElementById('" + id + "').removeAttribute('readonly',0);");
 
 
 			element.click();
 
-			((JavascriptExecutor)_driver).executeScript("document.getElementById('" + ID + "').setAttribute('value', '" + text + "')");
+			((JavascriptExecutor)drivernew).executeScript("document.getElementById('" + id + "').setAttribute('value', '" + text + "')");
 
-			_driver.findElement(By.xpath("//div[@id=\"fare_" + text + "\"]")).click();
+			drivernew.findElement(By.xpath("//div[@id=\"fare_" + text + "\"]")).click();
 
 
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
+			logger.error("Failed ==> {} {}" ,action , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
+			testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 			throw e;
 		}
 
 	}
 
 
-	public void WaitElementforelementclickable(WebDriver _driver,WebElement element, int timeOut) throws Exception
+	public void waitElementforelementclickable(WebDriver drivernew,WebElement element, int timeOut) throws  InterruptedException
 	{
 
 		try
 		{	
-			By locatorvalue=getLocatorvalue(element,_driver);
+			By locatorvalue=getLocatorvalue(element,drivernew);
 
-			WebDriverWait wait = new WebDriverWait(_driver, timeOut);
+			WebDriverWait wait = new WebDriverWait(drivernew, timeOut);
 			wait.until(ExpectedConditions.elementToBeClickable(locatorvalue));
 
 		}
 		catch (WebDriverException e)
-		{
-			try 
-			{
+		{			
 				Thread.sleep(1500);
-				By locatorvalue=getLocatorvalue(element,_driver);
+				By locatorvalue=getLocatorvalue(element,drivernew);
 
-				WebDriverWait wait = new WebDriverWait(_driver, timeOut);
+				WebDriverWait wait = new WebDriverWait(drivernew, timeOut);
 				wait.until(ExpectedConditions.elementToBeClickable(locatorvalue));
-			}
-			catch(WebDriverException f) 
-			{
-
-			}
-
+				
 
 		}
 	}
@@ -1375,152 +1202,127 @@ Thread.sleep(100);				break;
 
 	public static void waitForPageLoad(WebDriver driver) {
 
-
-		//		boolean isLoaded = false;
-		//	    
-		//	    
-		//	        String script = "if (typeof window != 'undefined' && window.document) { return window.document.readyState; } else { return 'notready'; }";
-		//	        
-		//	        try {
-		//	        	
-		//	        	isLoaded = ((JavascriptExecutor) driver).executeScript(script).equals("complete");
-		//	        	
-		//	        } 
-		//	        catch (Exception ex) {
-		//	        	isLoaded = Boolean.FALSE;
-		//	        }
-		//	       	    	    
-		////	      
-		//	    return isLoaded;
+		throw new UnsupportedOperationException("This method is not supported.");
 	}
-	//	public static final ExpectedCondition<Boolean> EXPECT_DOC_READY_STATE = new ExpectedCondition<Boolean>() {
-	//	    @Override
-	//	    public Boolean apply(WebDriver driver) 
-	//	    {
-	//	        String script = "if (typeof window != 'undefined' && window.document) { return window.document.readyState; } else { return 'notready'; }";
-	//	        Boolean result;
-	//	        try {
-	//	            result = ((JavascriptExecutor) driver).executeScript(script).equals("complete");
-	//	        } catch (Exception ex) {
-	//	            result = Boolean.FALSE;
-	//	        }
-	//	        return result;
-	//	    }
-	//	};
+	
 
 
-	public By getLocatorvalue(WebElement element,WebDriver _driver) throws Exception
+	public By getLocatorvalue(WebElement element,WebDriver drivernew) 
 	{
 
 		String locatoroutput= element.toString().split("->")[1].replaceFirst("(?s)(.*)\\]", "$1" + "");
-		String[] Splitlocator=locatoroutput.split(": ");
-		Splitlocator[0].replaceAll("\\s", "");	    
-		Splitlocator[1].replaceAll("\\s", "");
+		String[] splitlocator=locatoroutput.split(": ");
+		splitlocator[0] = splitlocator[0].replaceAll("\\s", "");	    
+		splitlocator[1] =splitlocator[1].replaceAll("\\s", "");
 
 
-		By locatorvalue=getlocatorvalueforwait(_driver, Splitlocator[0],Splitlocator[1]);
-		return locatorvalue;
+		return getlocatorvalueforwait(drivernew, splitlocator[0],splitlocator[1]);
 	}
 
-	public By getlocatorvalueforwait(WebDriver _driver, String LocatorType,String LocatorValue) throws Exception
+	public By getlocatorvalueforwait(WebDriver drivernew, String locatorType,String locatorValue) 
 	{
-		String Action = "Navigate -> ";
-		String ActionDescription = "";
-		LocalDateTime StartTime=  LocalDateTime.now();
+		String action = "Navigate -> ";
+		String actionDescription = "";
+		
 		try
 		{
 			By locatorvalue = null;
-			LocatorType.strip().trim();
-			LocatorValue.strip().trim();
-			logger.info("Finding Element having ==> LocatorType = " + LocatorType + " => LocatorValue = " + LocatorValue);
-			switch (LocatorType.toLowerCase())
+			locatorType =locatorType.strip().trim();
+			locatorValue =locatorValue.strip().trim();
+			logger.info("Finding Element having ==> LocatorType = {} => LocatorValue =  {}" ,locatorType , locatorValue);
+			switch (locatorType.toLowerCase())
 			{
 			case " id":
-				locatorvalue = By.id(LocatorValue.trim());
+				locatorvalue = By.id(locatorValue.trim());
 				break;
 			case " name":
-				locatorvalue = By.name(LocatorValue.trim());
+				locatorvalue = By.name(locatorValue.trim());
 				break;
 			case " xpath":
-				locatorvalue = By.xpath(LocatorValue.trim());
+				locatorvalue = By.xpath(locatorValue.trim());
 				break;
 			case " tag":
-				locatorvalue = By.name(LocatorValue.trim());
+				locatorvalue = By.name(locatorValue.trim());
 				break;
 			case " link text":
-				locatorvalue = By.linkText(LocatorValue.trim());
+				locatorvalue = By.linkText(locatorValue.trim());
 				break;
 			case " css":
-				locatorvalue = By.cssSelector(LocatorValue.trim());
+				locatorvalue = By.cssSelector(locatorValue.trim());
 				break;
 			case " class":
-				locatorvalue = By.className(LocatorValue.trim());
+				locatorvalue = By.className(locatorValue.trim());
 				break;
 			default:
-				logger.info("Incorrect Locator Type ==> LocatorType = " + LocatorType);
-				throw new Exception("Support FindElement with 'id' 'name' 'xpath' 'tag' 'link' 'css' 'class'");
+				logger.info("Incorrect Locator Type ==> LocatorType =  {}" , locatorType);
+				
 			}
 			return locatorvalue;
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
+			logger.error("Failed ==> {} {}" , action ,actionDescription);
+			
 
 			throw e;
 		}
 
 	}
 
-	/// <summary>
-	/// This method use for 
-	/// wait element ready to click 
-	/// </summary>
-	/// <param name="locatorValue"></param>
-	/// <param name="timeOut"></param>
-	public void WaitElementToBeClickable(WebDriver _driver, By locatorValue, int timeOut)
+	public void waitElementToBeClickable(WebDriver drivernew, By locatorValue, int timeOut)
 	{
+		String action = "Navigate -> ";
+		String actionDescription = "";
 		try
 		{
-			WebDriverWait wait = new WebDriverWait(_driver, timeOut);
+			WebDriverWait wait = new WebDriverWait(drivernew, timeOut);
 			wait.until(ExpectedConditions.elementToBeClickable(locatorValue));
 		}
 		catch (WebDriverException e)
 		{
-			//throw new OperationCanceledException("Get " + e.getMessage() + ", " + locatorValue + " is not ready for clickable");
+			logger.error("Failed ==> {} {}" , action ,actionDescription);
+			throw e;
 		}
 	}
 
-	public void Waitforinvisibilityofelement(WebDriver _driver, By locator) throws Exception
+	public void waitforinvisibilityofelement(WebDriver drivernew, By locator) 
 	{
+		String action = "Navigate -> ";
+		String actionDescription = "";
 		try 
 		{
-			WebDriverWait wait = new WebDriverWait(_driver, 3000);
+			WebDriverWait wait = new WebDriverWait(drivernew, 3000);
 			wait.until(ExpectedConditions.invisibilityOfElementLocated(locator));
 		}
 		catch(Exception e) 
 		{
-
+			logger.error("Failed ==> {} {}" , action ,actionDescription);
+throw e;
 		}
 
 	}
 
-	public String WP_getPageTitle(WebDriver _driver) 
+	public String wpGetPageTitle(WebDriver drivernew) 
 	{
+		String action = "Navigate -> ";
+		String actionDescription = "";
 		try {
-			String WP_PageTitle="";
-			int len=_driver.findElements(By.xpath("//*[@alt='Print' and @tabindex='0' and @class='vertical-align-middle cursor-hand height-20px printDoc']/.././../div/h2/span/label")).size();
+			String wpPageTitle="";
+			int len=drivernew.findElements(By.xpath("//*[@alt='Print' and @tabindex='0' and @class='vertical-align-middle cursor-hand height-20px printDoc']/.././../div/h2/span/label")).size();
 			if(len>0) 
 			{
-				WP_PageTitle=_driver.findElement(By.xpath("//*[@alt='Print' and @tabindex='0' and @class='vertical-align-middle cursor-hand height-20px printDoc']/.././../div/h2/span/label")).getText();
+				wpPageTitle=drivernew.findElement(By.xpath("//*[@alt='Print' and @tabindex='0' and @class='vertical-align-middle cursor-hand height-20px printDoc']/.././../div/h2/span/label")).getText();
 			}
 			else 
 			{
-				WP_PageTitle="";
+				wpPageTitle="";
 			}
-			return WP_PageTitle;
+			return wpPageTitle;
 		}
 		catch(Exception e) 
 		{
+			logger.error("Failed ==> {} {}" , action ,actionDescription);
+
 			throw e;
 		}
 	}
@@ -1528,96 +1330,100 @@ Thread.sleep(100);				break;
 
 
 
+	public void fluentWait(WebDriver drivernew, WebElement element) 
+	{
 
-	public void FluentWait(WebDriver _driver, WebElement element) throws Exception {
-	    try {
-	        Wait<WebDriver> wait2 = new FluentWait<>(_driver)
-	                .withTimeout(Duration.ofSeconds(1000))
-	                .pollingEvery(Duration.ofSeconds(5))
-	                .ignoring(Exception.class)
-	                .ignoring(NoSuchElementException.class)
-	                .ignoring(StaleElementReferenceException.class)
-	                .ignoring(ElementNotVisibleException.class);
+		try
+		{																		
 
-	        wait2.until(driver -> {
-	            if (element.isDisplayed()) {
-	                return element;
-	            } else {
-	                return null;
-	            }
-	        });
-	    } catch (TimeoutException e) {
-	        e.printStackTrace();
-	    }
+			Wait<WebDriver> wait2 = new FluentWait<WebDriver>(drivernew)
+					.ignoring(Exception.class)
+					.ignoring(NoSuchElementException.class)
+					.ignoring(StaleElementReferenceException.class)
+					.ignoring(ElementNotVisibleException.class);
+
+			wait2.until(new Function<WebDriver, WebElement>() 
+			{
+				public WebElement apply(WebDriver driver) {
+
+					if(element.isDisplayed())
+					{
+						return element;
+
+					}else
+					{
+						return null;
+					}
+				}
+			});
+
+		}
+		catch (TimeoutException e)
+		{
+
+			e.printStackTrace();
+		}
 	}
-
 	
-	/// <summary>
-	/// This method use for 
-	/// wait element visible on DOM
-	/// </summary>
-	/// <param name="locatorValue"></param>
-	/// <param name="timeOut"></param>
-	public void WaitElementVisible(WebDriver _driver, By locatorValue, int timeOut)
+	public void waitElementVisible(WebDriver drivernew, By locatorValue, int timeOut)
 	{
 
 
-	//	LocalDateTime StartTime=  LocalDateTime.now();
 
 		try
 		{
-			logger.info("Waiting for Element = " + locatorValue);
-			WebDriverWait wait1 = new WebDriverWait(_driver, timeOut);
+			logger.info("Waiting for Element = {}" ,locatorValue);
+			WebDriverWait wait1 = new WebDriverWait(drivernew, timeOut);
 			wait1.until(ExpectedConditions.visibilityOfElementLocated(locatorValue));
 
 		}
 		catch (TimeoutException e)
 		{
-			logger.error("Get " + e.toString() + ", " + locatorValue + " is not visible");
-			//throw new OperationCanceledException("Get " + e.getMessage() + ", " + locatorValue + " is not visible");
+			logger.error("Get {} , {} is not visible" , e, locatorValue);
+			
 		}
 	}
 
-	public void WaitElementClickable(WebDriver _driver, WebElement element)
+	public void waitElementClickable(WebDriver drivernew, WebElement element)
 	{
-		LocalDateTime StartTime=  LocalDateTime.now();
-
+    	String action = "Navigate -> ";
+		String actionDescription = "";
 		try
 		{
-			logger.info("Waiting for Element = " + element);
-			WebDriverWait wait = new WebDriverWait(_driver, 5000);
+			logger.info("Waiting for Element = {}" ,element);
+			WebDriverWait wait = new WebDriverWait(drivernew, 5000);
 			wait.until(ExpectedConditions.elementToBeClickable(element));
 		}
 		catch (Exception e)
 		{
+			logger.error("Failed ==> {} {}" , action ,actionDescription);
+
 			throw e;
 		}
 	}
 
 
-	public void WaitElementClickable(WebDriver _driver, WebElement locatorValue, int timeOut)
+	public void waitElementClickable(WebDriver drivernew, WebElement locatorValue, int timeOut)
 	{
-		LocalDateTime StartTime=  LocalDateTime.now();
-
+		
 		try
 		{
-			logger.info("Waiting for Element = " + locatorValue);
-			WebDriverWait wait = new WebDriverWait(_driver, timeOut);
+			logger.info("Waiting for Element = {} ", locatorValue);
+			WebDriverWait wait = new WebDriverWait(drivernew, timeOut);
 			wait.until(ExpectedConditions.elementToBeClickable(locatorValue));
 
 		}
 		catch (TimeoutException e)
 		{
-			logger.error("Get " + e.toString() + ", " + locatorValue + " is not visible");
-			//throw new OperationCanceledException("Get " + e.getMessage() + ", " + locatorValue + " is not visible");
+			logger.error("Get {} , {} is not visible",e ,locatorValue);
+			
 		}
 	}
-	public void WaitElementEnabled(WebDriver _driver, WebElement element, int timeOut) throws Exception
+	public void waitElementEnabled(WebDriver drivernew, WebElement element, int timeOut) 
 	{
 		for (int i = 0; i < timeOut; i++)
 		{
-			try
-			{
+			
 				if (element.isEnabled())
 				{
 					break;
@@ -1625,31 +1431,28 @@ Thread.sleep(100);				break;
 
 
 
-			}
-			catch (WebDriverException e)
-			{
-				throw new Exception("Get " + e.getMessage() + ", " + "Element is not visible");
-			}
+			
 		}
 	}
 
-	public void SwitchFocusToOtherWindow(WebDriver _driver, By pagetitlelocator)
+	public void switchFocusToOtherWindow(WebDriver drivernew, By pagetitlelocator)
 	{
+		String action = "Navigate -> ";
+		String actionDescription = "";
 		try {
-			String currentWindow = _driver.getWindowHandle();
-
-			Set<String> allWindows =  _driver.getWindowHandles();
+			
+			Set<String> allWindows =  drivernew.getWindowHandles();
 			for(String curWindow : allWindows){
-				_driver.switchTo().window(curWindow);
-				if(_driver.findElements(pagetitlelocator).size()>0) 
+				drivernew.switchTo().window(curWindow);
+				if(!(drivernew.findElements(pagetitlelocator).isEmpty())) 
 				{
-					String PageTitle=_driver.findElement(pagetitlelocator).getText();
-					logger.info(LOG_SWITCHED_TO,PageTitle);
+					String pageTitle=drivernew.findElement(pagetitlelocator).getText();
+					logger.info(LOG_SWITCHED_TO,pageTitle);
 				}
 				else 
 				{
-					String PageTitle=_driver.getTitle();
-					logger.info(LOG_SWITCHED_TO,PageTitle);
+					String pageTitle=drivernew.getTitle();
+					logger.info(LOG_SWITCHED_TO,pageTitle);
 
 				}
 			}
@@ -1657,230 +1460,167 @@ Thread.sleep(100);				break;
 		}
 		catch(Exception e) 
 		{
+			logger.error("Failed ==> {} {} " , action , actionDescription);
 			throw e;
 		}
 	}
 
-	public void SwitchFocusToMainWindow(WebDriver _driver, By pagetitlelocator)
+	public void switchFocusToMainWindow(WebDriver drivernew, By pagetitlelocator)
 	{
+		String action = "Navigate -> ";
+		String actionDescription = "";
 		try {
-			String currentWindow = _driver.getWindowHandle();
-			// _driver.switchTo().window(currentWindow);
-			String PageTitle=_driver.findElement(pagetitlelocator).getText();
-			logger.info(LOG_SWITCHED_TO,PageTitle);
-			Set<String> allWindows =  _driver.getWindowHandles();
+		
+			String pageTitle=drivernew.findElement(pagetitlelocator).getText();
+			logger.info(LOG_SWITCHED_TO,pageTitle);
+			Set<String> allWindows =  drivernew.getWindowHandles();
 
 			for(String curWindow : allWindows){
-				_driver.switchTo().window(curWindow);
-				if(_driver.findElements(pagetitlelocator).size()>0) 
+				drivernew.switchTo().window(curWindow);
+				if(!drivernew.findElements(pagetitlelocator).isEmpty()) 
 				{
-					PageTitle=_driver.findElement(pagetitlelocator).getText();
-					logger.info(LOG_SWITCHED_TO,PageTitle);
+					pageTitle=drivernew.findElement(pagetitlelocator).getText();
+					logger.info(LOG_SWITCHED_TO,pageTitle);
 					break;
 				}
 				else 
 				{
-					PageTitle=_driver.getTitle();
-					logger.info(LOG_SWITCHED_TO,PageTitle);
+					pageTitle=drivernew.getTitle();
+					logger.info(LOG_SWITCHED_TO,pageTitle);
 
 				}
 			}
 		}
 		catch(Exception e) 
 		{
+			logger.error("Failed ==> {} {} " , action , actionDescription);
 			throw e;
 		}
 	}
-	/// <summary>
-	/// This method use for 
-	/// wait title of page contain String user want
-	/// </summary>
-	/// <param name="title"></param>
-	/// <param name="timeOut"></param>
-	public void WaitTitleContains(WebDriver _driver, String title) throws Exception
+	
+	public void waitTitleContains(WebDriver drivernew, String title) 
 	{
+		String action = "Navigate -> ";
+		String actionDescription = "";
 		try
 		{
 			int timeOut=10000;
-			WebDriverWait wait = new WebDriverWait(_driver, timeOut);
+			WebDriverWait wait = new WebDriverWait(drivernew, timeOut);
 			wait.until(ExpectedConditions.titleContains(title));
 		}
 		catch (WebDriverException e)
 		{
-			throw new Exception("Get " + e.getMessage() + ", [" + title + "] is not displayed in WebPage title [" + _driver.getTitle() + "]");
+			logger.error("Failed ==> {} {} " , action , actionDescription);
+			throw e;
 		}
 	}
-	/// <summary>
-	/// This method use for 
-	/// get attribute of element in DOM
-	/// </summary>
-	/// <param name="element"></param>
-	/// <param name="attribute"></param>
-	/// <returns></returns>
-	public String GetAttribute(WebDriver _driver, WebElement element, String attribute)
+	
+	public String getAttribute(WebDriver drivernew, WebElement element, String attribute)
 	{
 		return element.getAttribute(attribute);
 	}
 
-	/// <summary>
-	/// This method use for 
-	/// get attribute of element in DOM
-	/// </summary>
-	/// <param name="element"></param>
-	/// <param name="attribute"></param>
-	/// <returns></returns>
-	public void VerifyAttributeValue(WebDriver _driver, WebElement element, String attribute,String ExpectedText,TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public void verifyAttributeValue(WebDriver drivernew, WebElement element, String attribute,String expectedText,TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
 
-		String Action = "Verify "+element.getAttribute(attribute)+" Attribute value-->"+ExpectedText;
-		String ActionDescription = "Verify "+element.getAttribute(attribute)+" Attribute value"+ExpectedText;
-		LocalDateTime StartTime = LocalDateTime.now();
-		if(element.getAttribute(attribute).equalsIgnoreCase(ExpectedText)) 
+		String action = "Verify "+element.getAttribute(attribute)+" Attribute value-->"+expectedText;
+		String actionDescription = "Verify "+element.getAttribute(attribute)+" Attribute value"+expectedText;
+		LocalDateTime startTime = LocalDateTime.now();
+		if(element.getAttribute(attribute).equalsIgnoreCase(expectedText)) 
 
 		{
-			TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
+			testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 		}
 		else 
 		{
-			TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+			testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 
 		}
 	}
-	/// <summary>
-	/// This method use for Driver title of page
-	/// </summary>
-	/// <returns></returns>
-	public boolean GetTitle(WebDriver _driver,String ExpectedTitle, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	
+	public boolean getTitle(WebDriver drivernew,String expectedTitle, TestCaseParam testCaseParam) throws IOException 
 	{
 
-		String Action = "Navigate -> ";
-		String ActionDescription = "";
-		LocalDateTime StartTime=  LocalDateTime.now();
+		String action = "Navigate -> ";
+		String actionDescription = "";
+		LocalDateTime startTime=  LocalDateTime.now();
 		try
 		{
 
-			String PageTitle = _driver.getTitle();
-			boolean ValidTitle = false;
-			if (ExpectedTitle.contains(PageTitle))
+			String pageTitle = drivernew.getTitle();
+			boolean validTitle = false;
+			if (expectedTitle.contains(pageTitle))
 			{
-				ValidTitle = true;
+				validTitle = true;
 			}
 			else
 			{
-				ValidTitle = false;
+				validTitle = false;
 			}
-			LocalDateTime EndTime =  LocalDateTime.now();
+			
 
 
-			logger.info("Successfully Navigated to " + PageTitle);
-			return ValidTitle;
+			logger.info("Successfully Navigated to {}" ,pageTitle);
+			return validTitle;
 
 
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
+			logger.error("Failed ==> {} {}" , action , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
 			throw e;
 		}
 	}
-	/// <summary>
-	/// This method is use for
-	/// return value of css
-	/// </summary>
-	/// <param name="element"></param>
-	/// <param name="value"></param>
-	/// <returns></returns>
-	public String GetCssValue(WebDriver _driver, WebElement element, String value)
+	
+	public String getCssValue(WebDriver drivernew, WebElement element, String value)
 	{
 		return element.getCssValue(value);
+		
 	}
-	/// <summary>
-	/// This method is use for
-	/// return source code of current page
-	/// </summary>
-	/// <returns></returns>
-	public String GetPageSource(WebDriver _driver)
+	
+	public String getPageSource(WebDriver drivernew)
 	{
-		return _driver.getPageSource();
+		return drivernew.getPageSource();
 	}
-	/// <summary>
-	/// This method use for 
-	/// wait page load completed
-	/// </summary>
-	/// <param name="driver"></param>
-	/// <param name="time"></param>
-	public void WaitForPageToLoad(WebDriver _driver, int time)
+	
+	public void waitForPageToLoad(WebDriver drivernew, int time)
 	{
-		/*		TimeSpan timeout = new TimeSpan(0, 0, time);
-		WebDriverWait wait = new WebDriverWait(_driver, timeout);
-		JavascriptExecutor javascript = _driver as JavascriptExecutor;
-		if (javascript == null)
-			throw new ArgumentException("driver", "Driver must support javascript execution");
-		wait.Until((d) =>
-		{
-			try
-			{
-				return javascript.executeScript("return document.readyState").equals("complete");
-			}
-			catch (InvalidOperationException e)
-			{
-				//Window is no longer available
-				return e.getMessage().ToLower().Contains("unable to Driver browser");
-			}
-			catch (WebDriverException e)
-			{
-				//Browser is no longer available
-				return e.getMessage().ToLower().Contains("unable to connect");
-			}
-			catch (Exception)
-			{
-				return false;
-			}
-		});
-		 */	}
-	/// <summary>
-	/// This method use for
-	/// set attribute of element
-	/// </summary>
-	/// <param name="element"></param>
-	/// <param name="attributeName"></param>
-	/// <param name="value"></param>
-	public void SetAttribute(WebDriver _driver, WebElement element, String attributeName, String value, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+		
+		logger.info("Wait For Page Load");
+	}
+	
+	public void setAttribute(WebDriver drivernew, WebElement element, String attributeName, String value, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
-		String Action = "Navigate -> ";
-		String ActionDescription = "";
-		LocalDateTime StartTime=  LocalDateTime.now();
+		String action = "Navigate -> ";
+		String actionDescription = "";
+		LocalDateTime startTime=  LocalDateTime.now();
 		try
 		{
 
 			WrapsDriver wrappedElement = (WrapsDriver) element;
 			if (wrappedElement == null)
-				throw new Exception("Element must wrap a web driver");
+				logger.info("Element must wrap a web driver");
 
-			_driver = wrappedElement.getWrappedDriver();
-			JavascriptExecutor js = (JavascriptExecutor)_driver;
-			if (js == null)
-				throw new Exception("Element must wrap a web driver that supports javascript execution");
-			js.executeScript("arguments[0].setAttribute(arguments[1], arguments[2])", element, attributeName, value);
+			drivernew = wrappedElement.getWrappedDriver();
+			JavascriptExecutor js = (JavascriptExecutor)drivernew;
+			if(js == null)
+				js.executeScript("arguments[0].setAttribute(arguments[1], arguments[2])", element, attributeName, value);
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
+			logger.error("Failed ==>{} {} " ,action , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
+			testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 			throw e;
 		}
 	}
-	/// <summary>
-	/// This method use for 
-	/// clear any text on text field
-	/// </summary>
-	/// <param name="element"></param>
-	public void ClearText(WebDriver _driver, WebElement element, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+
+	public void clearText(WebDriver drivernew, WebElement element, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
-		String Action = "Navigate -> ";
-		String ActionDescription = "";
-		LocalDateTime StartTime=  LocalDateTime.now();
+		String action = "Navigate -> ";
+		String actionDescription = "";
+		LocalDateTime startTime=  LocalDateTime.now();
 		try
 		{
 
@@ -1888,223 +1628,193 @@ Thread.sleep(100);				break;
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
+			logger.error("Failed ==> {} {} " ,action ,actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
+			testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 			throw e;
 		}
 	}
-	/// <summary>
-	/// This method is use for
-	/// Execute javascript
-	/// </summary>
-	/// <param name="driver"></param>
-	/// <returns></returns>
-	public JavascriptExecutor JavaScript(WebDriver driver)
+	
+	public JavascriptExecutor javaScript(WebDriver driver)
 	{
 		return (JavascriptExecutor)driver;
 	}
 
-	/// <summary>
-	/// This method is use for
-	/// return element
-	/// </summary>
-	/// <param name="value"></param>
-	/// <returns></returns>
-	public WebElement FindElement(WebDriver _driver, String value, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public WebElement findElement(WebDriver drivernew, String value, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
-		String Action = "Navigate -> ";
-		String ActionDescription = "";
-		LocalDateTime StartTime=  LocalDateTime.now();
+		String action = "Navigate -> ";
+		String actionDescription = "";
+		LocalDateTime startTime=  LocalDateTime.now();
 		try
 		{
 			WebElement element = null;
-			String LocatorType = value.split(";")[0];
-			String LocatorValue = value.split(";")[1];
-			logger.info("Finding Element having ==> LocatorType = " + LocatorType + " => LocatorValue = " + LocatorValue);
-			switch (LocatorType.toLowerCase())
+			String locatorType = value.split(";")[0];
+			String locatorValue = value.split(";")[1];
+			logger.info("Finding Element having ==> LocatorType = {} => LocatorValue = {}",locatorType,locatorValue);
+			switch (locatorType.toLowerCase())
 			{
 			case "id":
-				element = _driver.findElement(By.id(LocatorValue));
+				element = drivernew.findElement(By.id(locatorValue));
 				break;
 			case "name":
-				element = _driver.findElement(By.name(LocatorValue));
+				element = drivernew.findElement(By.name(locatorValue));
 				break;
 			case "xpath":
-				element = _driver.findElement(By.xpath(LocatorValue));
+				element = drivernew.findElement(By.xpath(locatorValue));
 				break;
 			case "tag":
-				element = _driver.findElement(By.name(LocatorValue));
+				element = drivernew.findElement(By.name(locatorValue));
 				break;
 			case "link":
-				element = _driver.findElement(By.linkText(LocatorValue));
+				element = drivernew.findElement(By.linkText(locatorValue));
 				break;
 			case "css":
-				element = _driver.findElement(By.cssSelector(LocatorValue));
+				element = drivernew.findElement(By.cssSelector(locatorValue));
 				break;
 			case "class":
-				element = _driver.findElement(By.className(LocatorValue));
+				element = drivernew.findElement(By.className(locatorValue));
 				break;
 			default:
-				logger.info("Incorrect Locator Type ==> LocatorType = " + LocatorType);
-				throw new Exception("Support FindElement with 'id' 'name' 'xpath' 'tag' 'link' 'css' 'class'");
+				logger.info("Incorrect Locator Type ==> LocatorType = {}" ,locatorType);
+				
 			}
 			return element;
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
+			logger.error("Failed ==> {} {}" ,action ,actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
+			testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 
 			throw e;
 		}
 
 	}
 
-	public String getElementText(WebDriver _driver, String LocatorType,String LocatorValue, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public String getElementText(WebDriver drivernew, String locatorType,String locatorValue, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException
 	{
-		String Action = "Navigate -> ";
-		String ActionDescription = "";
-		LocalDateTime StartTime=  LocalDateTime.now();
+		String action = "Navigate -> ";
+		String actionDescription = "";
+		LocalDateTime startTime=  LocalDateTime.now();
 		try
 		{
 
 
-			String Text=null;
+			String text=null;
 			WebElement element = null;
-			LocatorType.trim();
-			LocatorValue.trim();
-			logger.info("Finding Element having ==> LocatorType = " + LocatorType + " => LocatorValue = " + LocatorValue);
-			switch (LocatorType.toLowerCase())
+			locatorType =locatorType.trim();
+			locatorValue =locatorValue.trim();
+			logger.info("Finding Element having ==> LocatorType = {}=> LocatorValue = {} " ,locatorType ,locatorValue);
+			switch (locatorType.toLowerCase())
 			{
 			case " id":
-				element = _driver.findElement(By.id(LocatorValue.trim()));
-				Text=element.getAttribute("Value");
-				if(Text==null) 
-				{
-					Text=element.getText();
-				}
+				element = drivernew.findElement(By.id(locatorValue));
+				text=element.getAttribute("Value");
+				text = checkTextNull(text, element);
 				break;
 			case " name":
-				element = _driver.findElement(By.name(LocatorValue.trim()));
-				Text=element.getAttribute("Value");
-				if(Text==null) 
-				{
-					Text=element.getText();
-				}
+			  case " tag":
+				element = drivernew.findElement(By.name(locatorValue));
+				text=element.getAttribute("Value");
+				text = checkTextNull(text, element);
 				break;
 			case " xpath":
-				element = _driver.findElement(By.xpath(LocatorValue.trim()));
-				Text=element.getAttribute("Value");
-				if(Text==null) 
-				{
-					Text=element.getText();
-				}
+				element = drivernew.findElement(By.xpath(locatorValue));
+				text=element.getAttribute("Value");
+				text = checkTextNull(text, element);
 				break;
-			case " tag":
-				element = _driver.findElement(By.name(LocatorValue.trim()));
-				Text=element.getAttribute("Value");
-				if(Text==null) 
-				{
-					Text=element.getText();
-				}
-				break;
+			
 			case " link text":
-				element = _driver.findElement(By.linkText(LocatorValue.trim()));
-				Text=element.getAttribute("Value");
-				if(Text==null) 
-				{
-					Text=element.getText();
-				}
+				element = drivernew.findElement(By.linkText(locatorValue));
+				text=element.getAttribute("Value");
+				text = checkTextNull(text, element);
 				break;
 			case " css":
-				element = _driver.findElement(By.cssSelector(LocatorValue.trim()));
-				Text=element.getAttribute("Value");
-				if(Text==null) 
-				{
-					Text=element.getText();
-				}
+				element = drivernew.findElement(By.cssSelector(locatorValue));
+				text=element.getAttribute("Value");
+				text = checkTextNull(text, element);
 				break;
 			case " class":
-				element = _driver.findElement(By.className(LocatorValue.trim()));
-				Text=element.getAttribute("Value");
-				if(Text==null) 
-				{
-					Text=element.getText();
-				}
+				element = drivernew.findElement(By.className(locatorValue));
+				text=element.getAttribute("Value");
+				text = checkTextNull(text, element);
 				break;
 			default:
-				logger.info("Incorrect Locator Type ==> LocatorType = " + LocatorType);
-				throw new Exception("Support FindElement with 'id' 'name' 'xpath' 'tag' 'link' 'css' 'class'");
+				logger.info("Incorrect Locator Type ==> LocatorType = {} " ,locatorType);
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
+				
 			}
-			return Text;
+			return text;
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
+			logger.error("Failed ==> {} {}" , action , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
 
 			throw e;
 		}
 
 	}
-	/// <summary>
-	/// This method is use for
-	/// return elements in list
-	/// </summary>
-	/// <param name="value"></param>
-	/// <returns></returns>
-	public ArrayList<WebElement> FindElements(WebDriver _driver, String value) throws Exception
-	{
-		List<WebElement> elements = null;
-		String LocatorType = value.split(";")[0];
-		String LocatorValue = value.split(";")[1];
 
-		logger.info("Finding Element having ==> LocatorType = " + LocatorType + " => LocatorValue = " + LocatorValue);
-
-		switch (LocatorType.toLowerCase())
+	private String checkTextNull(String text, WebElement element) {
+		if(text==null) 
 		{
-		case "id":
-			elements = _driver.findElements(By.id(LocatorValue));
-			break;
-		case "name":
-			elements = _driver.findElements(By.name(LocatorValue));
-			break;
-		case "xpath":
-			elements = _driver.findElements(By.xpath(LocatorValue));
-			break;
-		case "tag":
-			elements = _driver.findElements(By.name(LocatorValue));
-			break;
-		case "link":
-			elements = _driver.findElements(By.linkText(LocatorValue));
-			break;
-		case "css":
-			elements = _driver.findElements(By.cssSelector(LocatorValue));
-			break;
-		case "class":
-			elements = _driver.findElements(By.className(LocatorValue));
-			break;
-		default:
-			logger.info("Incorrect Locator Type ==> LocatorType = " + LocatorType);
-			throw new Exception("Support FindElement with 'id' 'name' 'xpath' 'tag' 'link' 'css' 'class'");
+			text=element.getText();
 		}
-		return (ArrayList<WebElement>) elements;
+		return text;
 	}
 
-	public boolean IsElementVisible(WebElement element)
+	public List<WebElement> findElements(WebDriver drivernew, String value) 
+	{
+		List<WebElement> elements = null;
+		String locatorType = value.split(";")[0];
+		String locatorValue = value.split(";")[1];
+
+		logger.info("Finding Element having ==> LocatorType = {} => LocatorValue =  {} " , locatorType , locatorValue);
+
+		switch (locatorType.toLowerCase())
+		{
+		case "id":
+			elements = drivernew.findElements(By.id(locatorValue));
+			break;
+		case "name":
+			elements = drivernew.findElements(By.name(locatorValue));
+			break;
+		case "xpath":
+			elements = drivernew.findElements(By.xpath(locatorValue));
+			break;
+		case "tag":
+			elements = drivernew.findElements(By.name(locatorValue));
+			break;
+		case "link":
+			elements = drivernew.findElements(By.linkText(locatorValue));
+			break;
+		case "css":
+			elements = drivernew.findElements(By.cssSelector(locatorValue));
+			break;
+		case "class":
+			elements = drivernew.findElements(By.className(locatorValue));
+			break;
+		default:
+			logger.info("Incorrect Locator Type ==> LocatorType = {}" ,locatorType);
+			
+		}
+		return  elements;
+	}
+
+	public boolean isElementVisible(WebElement element)
 	{
 		return element.isDisplayed();
 	}
 
-	public void waitweb_ElementVisible(WebDriver _driver, WebElement locatorValue, int timeOut) throws Exception
+	public void waitwebElementVisible(WebDriver drivernew, WebElement locatorValue, int timeOut) 
 	{
-	//	LocalDateTime StartTime = LocalDateTime.now();
-
+	
 		try
 		{
-			logger.info("Waiting for Element = " + locatorValue);
-			WebDriverWait wait = new WebDriverWait(_driver, timeOut);
-			boolean visible = IsElementVisible(locatorValue);
+			logger.info("Waiting for Element = {}" , locatorValue);
+            
+			boolean visible = isElementVisible(locatorValue);
 			while (true)
 			{
 				if(visible)
@@ -2121,110 +1831,108 @@ Thread.sleep(100);				break;
 		}
 		catch (Exception e)
 		{
-			logger.error("Get " + e.toString() + ", " + locatorValue + " is not visible");
-			throw new Exception("Get " + e.getMessage() + ", " + locatorValue + " is not visible");
+			logger.error("Error: {}, Locator value: {} is not visible.", e, locatorValue);
+			
+			
+			
 		}
 	}
 
-	public void VerifyTextDisplayed(WebDriver driver, WebElement element, String text, TestCaseParam testCaseParam,PageDetails pageDetails, int timeout) throws Exception
+	public void verifyTextDisplayed(WebDriver driver, WebElement element, String text, TestCaseParam testCaseParam,PageDetails pageDetails, int timeout) throws IOException 
 	{
 
 		String value = "";
-		WebDriverWait wait = new WebDriverWait(driver, timeout);
-		waitweb_ElementVisible(driver, element,timeout);
+		
+		waitwebElementVisible(driver, element,timeout);
 
-		value = JSGetText(driver, element, testCaseParam,pageDetails);
+		value = jsGetText(driver, element, testCaseParam,pageDetails);
 
 		if (value.equals(text.trim()))
 		{
-			logger.info("The value displayed in the application is as expected: ||" + value + "||");
+			logger.info("The value displayed in the application is as expected: ||{}||", value);
 		}
 		else
 		{
-			logger.info("The value displayed in the application: ||" + value + "||, Expected Value: ||" + text + "||. This is not as expected");
+			logger.info("The value displayed in the application: ||{}||, Expected Value: ||{}||. This is not as expected.", value, text);
 		}
 	}
 
 
 
-	public void VerifyElementPresent(WebDriver driver, WebElement element,TestCaseParam testCaseParam, int timeout) throws Exception
+	public void verifyElementPresent(WebDriver driver, WebElement element,TestCaseParam testCaseParam, int timeout) throws IOException 
 	{
-		String TestStepName = "VerifyElementPresent";
-		String TestStepDescription = "VerifyElementPresent";
-		LocalDateTime StartTime = LocalDateTime.now();
+		String testStepName = "VerifyElementPresent";
+		String testStepDescription = "VerifyElementPresent";
+		LocalDateTime startTime = LocalDateTime.now();
 		Boolean isDisplayed = false;
 
 		try
 		{
-			WebDriverWait wait = new WebDriverWait(driver, timeout);
-			waitweb_ElementVisible(driver, element,timeout);
-			isDisplayed = IsElementVisible(element);
-			logger.info("Element present in application: " + isDisplayed);
-			if (isDisplayed)
+			
+			waitwebElementVisible(driver, element,timeout);
+			isDisplayed = isElementVisible(element);
+			logger.info("Element present in application: {}" , isDisplayed);
+			if (isDisplayed.equals(true))
 			{
 				logger.info("The Element is displayed in the application");
-				//testStepLog.Log("Verifying Element Present", "Element is present on the page: ||" + by + "||", Report.Status.PASS, driver, testCase, ScenarioName, module, currentIteration, browser, node);
+				
 			}
 			else
 			{
 				logger.info("The Element is not displayed in the application");
-				//testStepLog.Log("Verifying Element Present", "Element is hidden on the page: ||" + by + "||", Report.Status.FAIL, driver, testCase, ScenarioName, module, currentIteration, browser, node);
+				
 			}
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + TestStepDescription);
-			exceptionDetails.logExceptionDetails(driver, testCaseParam, TestStepName, TestStepDescription, StartTime);
+			logger.error("Failed ==> {}" , testStepDescription);
+			exceptionDetails.logExceptionDetails(driver, testCaseParam, testStepName, testStepDescription, startTime);
 			throw e;
 		}
 	}
 
 
-	public void DocumentUpload(WebDriver _driver, WebElement element,String Path,String DocName, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public void documentUpload(WebDriver drivernew, WebElement element,String path,String docName, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
-		String Action = "Upload Document";
-		String ActionDescription = "Upload Document";
-		LocalDateTime StartTime = LocalDateTime.now();
+		String action = "Upload Document";
+		String actionDescription = "Upload Document";
+		LocalDateTime startTime = LocalDateTime.now();
 
 
 		try
 		{
-			webkeywords.Instance().FluentWait(_driver, element);
+			Webkeywords.instance().fluentWait(drivernew, element);
 
 
-			element.sendKeys(Path+DocName);
+			element.sendKeys(path+docName);
 
-			TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
+			testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 
 
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
+			logger.error("Failed ==> {} {}" ,action , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
 			throw e;
 		}
 	}
 
 
 	//*********************************SCREEN VALIDATIONS**************************************************
-	public void VerifyDropdownSelection(WebDriver _driver, WebElement element, String options, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public void verifyDropdownSelection(WebDriver drivernew, WebElement element, String options, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
-		String Action = "Verify Dropdown-->Actual:"+options+":Expected:-"+element.getText();
-		String ActionDescription = "Verify Dropdown-->Actual:"+options+":Expected:-"+element.getText();
-		LocalDateTime StartTime = LocalDateTime.now();
-		Boolean Valuefound = false;
+		String action = "Verify Dropdown-->Actual:"+options+":Expected:-"+element.getText();
+		String actionDescription = "Verify Dropdown-->Actual:"+options+":Expected:-"+element.getText();
+		LocalDateTime startTime = LocalDateTime.now();
+		Boolean valuefound = false;
 
 		try
 		{
-			if(options.equals("N//A")||options.equals(null)) 
+			if(!(options.equals("N//A")||options==null)) 
 			{
 
-			}
-			else
-			{
-
-				webkeywords.Instance().FluentWait(_driver, element);
+				Webkeywords.instance().fluentWait(drivernew, element);
 				Select select = new Select(element);
 				List<WebElement> allOptions = select.getOptions();
 				for(int i=0; i<allOptions.size(); i++) 
@@ -2232,110 +1940,105 @@ Thread.sleep(100);				break;
 
 					if(allOptions.get(i).getText().contains(options)) 
 					{
-						Valuefound=true;
-						Action = "Verify Dropdown-->Actual:"+options+":Expected:-"+allOptions.get(i).getText();
-						ActionDescription = "Verify Dropdown-->Actual:"+element.getText()+":Expected:-"+allOptions.get(i).getText();
+						valuefound=true;
+						action = "Verify Dropdown-->Actual:"+options+":Expected:-"+allOptions.get(i).getText();
+						actionDescription = "Verify Dropdown-->Actual:"+element.getText()+":Expected:-"+allOptions.get(i).getText();
 						break;
 					}
 				}
-				if(Valuefound) 
+				if(valuefound.equals(true)) 
 				{
-					TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
+					testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 				}
 				else 
 				{
-					TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+					testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 
 				}
 			}
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
+			logger.error("Failed ==> {} {}" , action , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
 			throw e;
 		}
 	}
 
 
-	public void VerifyDropdownText(WebDriver _driver, WebElement element, String options, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public void verifyDropdownText(WebDriver drivernew, WebElement element, String options, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
-		String Action = "Verify Dropdown Text-->Actual:"+options+":Expected:-"+element.getText();
-		String ActionDescription = "Verify Dropdown Text-->Actual:"+options+":Expected:-"+element.getText();
-		LocalDateTime StartTime = LocalDateTime.now();
-		Boolean Valuefound = false;
+		String action = "Verify Dropdown Text-->Actual:"+options+":Expected:-"+element.getText();
+		String actionDescription = "Verify Dropdown Text-->Actual:"+options+":Expected:-"+element.getText();
+		LocalDateTime startTime = LocalDateTime.now();
+		Boolean valuefound = false;
 
 		try
 		{
-			if(options.equals("N//A")||options.equals(null)) 
+			if(!(options.equals("N//A")||options==null)) 
 			{
 
-			}
-			else
-			{
-				webkeywords.Instance().FluentWait(_driver, element);
+				Webkeywords.instance().fluentWait(drivernew, element);
 				Select select = new Select(element);
 				List<WebElement> allOptions =select.getAllSelectedOptions();			
 				for(int i=0; i<allOptions.size();i++) 
 				{
 					if(allOptions.get(i).getText().contains(options)) 
 					{
-						Valuefound=true;
-						Action = "Verify Dropdown-->Actual:"+options+":Expected:-"+allOptions.get(i).getText();
-						ActionDescription = "Verify Dropdown-->Actual:"+options+":Expected:-"+allOptions.get(i).getText();
+						valuefound=true;
+						action = "Verify Dropdown-->Actual:"+options+":Expected:-"+allOptions.get(i).getText();
+						actionDescription = "Verify Dropdown-->Actual:"+options+":Expected:-"+allOptions.get(i).getText();
 						break;
 					}
 				}
 
-				if(Valuefound) 
+				if(valuefound.equals(true)) 
 				{
-					TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
+					testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 				}
 				else 
 				{
-					TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+					testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 
 				}
 			}
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
+			logger.error("Failed ==> {} {}" , action , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
 			throw e;
 		}
 	}
 
-	public void verifytextentered(WebDriver _driver, WebElement element, String text, TestCaseParam testCaseParam, PageDetails pageDetails) throws Exception
+	public void verifytextentered(WebDriver drivernew, WebElement element, String text, TestCaseParam testCaseParam, PageDetails pageDetails) throws IOException
 	{
-		String Action = "Verify Dropdown Selection-->"+text;
-		String ActionDescription = "Verify Dropdown Selection"+text;
-		LocalDateTime StartTime = LocalDateTime.now();
-		Boolean Verified = false;
+		String action = "Verify Dropdown Selection-->"+text;
+		String actionDescription = "Verify Dropdown Selection"+text;
+		LocalDateTime startTime = LocalDateTime.now();
+		Boolean verified = false;
 
 		try
 		{
-			if(text.equals("N//A")||text.equals(null)) 
+			if(!(text.equals("N//A")||text==null)) 
 			{
 
-			}
-			else
-			{
-				webkeywords.Instance().FluentWait(_driver, element);
-				String EnteredText = element.getText();
+				Webkeywords.instance().fluentWait(drivernew, element);
+				String enteredText = element.getText();
 
-				if(EnteredText.equals(text)) 
+				if(enteredText.equals(text)) 
 				{
-					Verified=true;
+					verified=true;
 				}
+				
 
-				if(Verified)
+				if(verified.equals(true))
 				{
-					TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Pass);
+					testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSPASS);
 				}
 				else 
 				{
-					TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+					testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 				}
 			}
 
@@ -2344,139 +2047,139 @@ Thread.sleep(100);				break;
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
+			logger.error("Failed ==> {} {} " , action , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
 			throw e;
 		}
 	}
 
-	public void VerifyElementDisplayed(WebDriver _driver, WebElement element,String testdata, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public void verifyElementDisplayed(WebDriver drivernew, WebElement element,String testdata, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
-		String action_v1 = "Verify Element Displayed--"+element.getAttribute("Value");
-		String actionDescription = "Verify Element Displayed--"+element.getAttribute("Value");
+		String actionv1 = VRIFYELEMENT+element.getAttribute("Value");
+		String actionDescription =VRIFYELEMENT+element.getAttribute("Value");
 		LocalDateTime startTime = LocalDateTime.now();
 
-		if((testdata.equalsIgnoreCase("n/a")==false)||(testdata.equalsIgnoreCase("n\\a"))==false||(testdata.equalsIgnoreCase("n\\\\a"))==false)
+		if(!(testdata.equalsIgnoreCase("n/a"))||!(testdata.equalsIgnoreCase("n\\a"))||!(testdata.equalsIgnoreCase("n\\\\a")))
 		{
 
 		try
 		{
-			scrollIntoViewElement(_driver, element);
-			Actions action = new Actions(_driver);
+			scrollIntoViewElement(drivernew, element);
+			Actions action = new Actions(drivernew);
 			action.moveToElement(element).perform();
-			if(element.isDisplayed()==true) 
+			if(element.isDisplayed()) 
 			{
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, action_v1, actionDescription,pageDetails, startTime, "Pass");
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, actionv1, actionDescription,pageDetails, startTime, "Pass");
 			}
 			else 
 			{
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, action_v1, actionDescription,pageDetails, startTime, Status_Fail);
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, actionv1, actionDescription,pageDetails, startTime, STATUSFAIL);
 
 			}
 
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + action_v1 + actionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, action_v1, actionDescription, startTime,e);
+			logger.error("Failed ==> {} {}" ,actionv1 , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, actionv1, actionDescription, startTime,e);
 			throw e;
 		}
 		}
 	}
 	
-	public void VerifyElementDisplayed_textattribute(WebDriver _driver, WebElement element,String TestData, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public void verifyElementDisplayedtextattribute(WebDriver drivernew, WebElement element,String testData, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
-		String Action = "Verify Element Displayed--"+element.getText();
-		String ActionDescription = "Verify Element Displayed--"+element.getText();
-		LocalDateTime StartTime = LocalDateTime.now();
+		String actionNew =VRIFYELEMENT+element.getText();
+		String actionDescription =VRIFYELEMENT+element.getText();
+		LocalDateTime startTime = LocalDateTime.now();
 
-		if((TestData.equalsIgnoreCase("n/a")==false)||(TestData.equalsIgnoreCase("n\\a"))==false||(TestData.equalsIgnoreCase("n\\\\a"))==false)
+		if(!(testData.equalsIgnoreCase("n/a"))||!(testData.equalsIgnoreCase("n\\a"))||!(testData.equalsIgnoreCase("n\\\\a")))
 		{
 
 		try
 		{
-			Actions action = new Actions(_driver);
+			Actions action = new Actions(drivernew);
 			action.moveToElement(element).perform();
-			if(element.isDisplayed()==true) 
+			if(element.isDisplayed()) 
 			{
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, "Pass");
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, actionNew, actionDescription,pageDetails, startTime, "Pass");
 			}
 			else 
 			{
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, actionNew, actionDescription,pageDetails, startTime, STATUSFAIL);
 
 			}
 
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
+			logger.error("Failed ==> {} {} " , actionNew , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, actionNew, actionDescription, startTime,e);
 			throw e;
 		}
 		}
 	}
 
-	public void verifyelementnotdisplayed(WebDriver _driver, List<WebElement> element, String TestData, TestCaseParam testCaseParam, PageDetails pageDetails) throws Exception
+	public void verifyelementnotdisplayed(WebDriver drivernew, List<WebElement> element, String testData, TestCaseParam testCaseParam, PageDetails pageDetails) throws IOException
 	{
-		String Action = "Verify Element Not Displayed--"+ TestData;
-		String ActionDescription = "Verify Element Not Displayed--"+ TestData;
-		LocalDateTime StartTime = LocalDateTime.now();
+		String action = "Verify Element Not Displayed--"+ testData;
+		String actionDescription = "Verify Element Not Displayed--"+ testData;
+		LocalDateTime startTime = LocalDateTime.now();
 
-		if((TestData.equalsIgnoreCase("n/a")==false)||(TestData.equalsIgnoreCase("n\\a"))==false||(TestData.equalsIgnoreCase("n\\\\a"))==false)
+		if(!(testData.equalsIgnoreCase("n/a"))|| !(testData.equalsIgnoreCase("n\\a"))|| !(testData.equalsIgnoreCase("n\\\\a")))
 		{
 
 
 		try
 		{
 
-			if(element.size()>0) 
+			if(!element.isEmpty()) 
 			{
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 			}
 			else 
 			{
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Pass);
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSPASS);
 			}
 
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
+			logger.error("Failed ==>{} {} " , action , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
 			throw e;
 		}
 		}
 	}
 	
 	
-	public void verifyelementnotdisplayed(WebDriver _driver, String xpath, String TestData, TestCaseParam testCaseParam, PageDetails pageDetails) throws Exception
+	public void verifyelementnotdisplayed(WebDriver drivernew, String xpath, String testData, TestCaseParam testCaseParam, PageDetails pageDetails) throws IOException
 	{
-		String Action = "Verify Element Not Displayed--"+ TestData;
-		String ActionDescription = "Verify Element Not Displayed--"+ TestData;
-		LocalDateTime StartTime = LocalDateTime.now();
+		String action = "Verify Element Not Displayed--"+ testData;
+		String actionDescription = "Verify Element Not Displayed--"+ testData;
+		LocalDateTime startTime = LocalDateTime.now();
 
-		if((TestData.equalsIgnoreCase("n/a")==false)||(TestData.equalsIgnoreCase("n\\a"))==false||(TestData.equalsIgnoreCase("n\\\\a"))==false)
+		if(!(testData.equalsIgnoreCase("n/a"))||!(testData.equalsIgnoreCase("n\\a"))||!(testData.equalsIgnoreCase("n\\\\a")))
 		{
 
 		try
 		{
 
-			int size=_driver.findElements(By.xpath(xpath)).size();
+			int size=drivernew.findElements(By.xpath(xpath)).size();
 			if(size>0) 
 			{
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 			}
 			else 
 			{
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Pass);
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSPASS);
 			}
 
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
+			logger.error("Failed ==> {} {}" , action , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
 			throw e;
 		}
 		}
@@ -2485,80 +2188,80 @@ Thread.sleep(100);				break;
 
 
 
-	public void VerifyElementEnabled(WebDriver _driver, WebElement element,String TestData, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public void verifyElementEnabled(WebDriver drivernew, WebElement element,String testData, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
-		String Action = "Verify Element Enabled";
-		String ActionDescription = "Verify Element Enabled";
-		LocalDateTime StartTime = LocalDateTime.now();
+		String actionnew = "Verify Element Enabled";
+		String actionDescription = "Verify Element Enabled";
+		LocalDateTime startTime = LocalDateTime.now();
 
-				if (!TestData.equalsIgnoreCase("n/a") || !TestData.equalsIgnoreCase("n\\a") || !TestData.equalsIgnoreCase("n\\\\a"))
+				if (!testData.equalsIgnoreCase("n/a") || !testData.equalsIgnoreCase("n\\a") || !testData.equalsIgnoreCase("n\\\\a"))
 
 			{
 
 		try
 		{
-			Actions action=new Actions(_driver);
+			Actions action=new Actions(drivernew);
 			action.moveToElement(element);
 
 			if(element.isEnabled())
 			{
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, "Pass");
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, actionnew, actionDescription,pageDetails, startTime, "Pass");
 			}
 			else 
 			{
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, actionnew, actionDescription,pageDetails, startTime, STATUSFAIL);
 
 			}
 
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
+			logger.error("Failed ==>{} {} " , actionnew , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, actionnew, actionDescription, startTime,e);
 			throw e;
 		}
 		}
 	}
 
-	public void VerifyElementSelected(WebDriver _driver, WebElement element,String TestData, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public void verifyElementSelected(WebDriver drivernew, WebElement element,String testData, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
 		String action = "Verify Element Selected";
 		String actionDescription = "Verify Element Selected";
 		LocalDateTime startTime = LocalDateTime.now();
 
-		if((TestData.equalsIgnoreCase("n/a")==false)||(TestData.equalsIgnoreCase("n\\a"))==false||(TestData.equalsIgnoreCase("n\\\\a"))==false)
+		if(!(testData.equalsIgnoreCase("n/a"))||!(testData.equalsIgnoreCase("n\\a"))||!(testData.equalsIgnoreCase("n\\\\a")))
 		{
 
 
 		try
 		{
 
-			if(element.isSelected()==true) 
+			if(element.isSelected()) 
 			{
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, action, actionDescription,pageDetails, startTime, "Pass");
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, "Pass");
 			}
 			else 
 			{
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, action, actionDescription,pageDetails, startTime, Status_Fail);
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 
 			}
 
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + action + actionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, action, actionDescription, startTime,e);
+			logger.error("Failed ==> {} {}" ,action ,actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
 			throw e;
 		}
 		}
 	}
 
-	public void VerifyElementDisabled(WebDriver _driver, WebElement element,String TestData, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public void verifyElementDisabled(WebDriver drivernew, WebElement element,String testData, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
-		String Action = "Verify Element Disabled";
-		String ActionDescription = "Verify Element Disabled";
-		LocalDateTime StartTime = LocalDateTime.now();
-		if((TestData.equalsIgnoreCase("n/a")==false)||(TestData.equalsIgnoreCase("n\\a"))==false||(TestData.equalsIgnoreCase("n\\\\a"))==false)
+		String action = "Verify Element Disabled";
+		String actionDescription = "Verify Element Disabled";
+		LocalDateTime startTime = LocalDateTime.now();
+		if(!(testData.equalsIgnoreCase("n/a"))||!(testData.equalsIgnoreCase("n\\a"))||!(testData.equalsIgnoreCase("n\\\\a")))
 		{
 
 
@@ -2568,31 +2271,31 @@ Thread.sleep(100);				break;
 
 			if(!element.getAttribute("disabled").equals("true")) 
 			{
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, "Pass");
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, "Pass");
 			}
 			else 
 			{
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 
 			}
 
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
+			logger.error("Failed ==> {} {}" , action ,actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
 			throw e;
 		}
 		}
 	}
 
-	public void VerifyCheckBoxChecked(WebDriver _driver, WebElement element,String TestData, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public void verifyCheckBoxChecked(WebDriver drivernew, WebElement element,String testData, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
-		String Action = "Verify CheckBox Checked";
-		String ActionDescription = "Verify CheckBox Checked";
-		LocalDateTime StartTime = LocalDateTime.now();
+		String action = "Verify CheckBox Checked";
+		String actionDescription = "Verify CheckBox Checked";
+		LocalDateTime startTime = LocalDateTime.now();
 
-		if((TestData.equalsIgnoreCase("n/a")==false)||(TestData.equalsIgnoreCase("n\\a"))==false||(TestData.equalsIgnoreCase("n\\\\a"))==false)
+		if(!(testData.equalsIgnoreCase("n/a"))||!(testData.equalsIgnoreCase("n\\a"))||!(testData.equalsIgnoreCase("n\\\\a")))
 		{
 
 		try
@@ -2600,90 +2303,90 @@ Thread.sleep(100);				break;
 
 			if(element.getAttribute("checked").equals("true")) 
 			{
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, "Pass");
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, "Pass");
 			}
 			else 
 			{
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 
 			}
 
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
+			logger.error("Failed ==> {} {}" , action , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
 			throw e;
 		}
 		}
 	}
 
-	public void VerifyElementTitle(WebDriver _driver, WebElement element,String TestData, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public void verifyElementTitle(WebDriver drivernew, WebElement element,String testData, TestCaseParam testCaseParam,PageDetails pageDetails)throws IOException 
 	{
-		String Action = "Verify Element Title";
-		String ActionDescription = "Verify Element Title";
-		LocalDateTime StartTime = LocalDateTime.now();
+		String action = "Verify Element Title";
+		String actionDescription = "Verify Element Title";
+		LocalDateTime startTime = LocalDateTime.now();
 
-		if((TestData.equalsIgnoreCase("n/a")==false)||(TestData.equalsIgnoreCase("n\\a"))==false||(TestData.equalsIgnoreCase("n\\\\a"))==false)
+		if(!(testData.equalsIgnoreCase("n/a"))||!(testData.equalsIgnoreCase("n\\a"))||!(testData.equalsIgnoreCase("n\\\\a")))
 		{
 
 
 		try
 		{
 
-			if(element.getAttribute("title").equals(TestData)) 
+			if(element.getAttribute("title").equals(testData)) 
 			{
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, "Pass");
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, "Pass");
 			}
 			else 
 			{
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 
 			}
 
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
+			logger.error("Failed ==> {} {}" ,action , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
 			throw e;
 		}
 		}
 	}
 
-	public void VerifyTextBoxValue(WebDriver _driver, WebElement element,String TestData, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public void verifyTextBoxValue(WebDriver drivernew, WebElement element,String testData, TestCaseParam testCaseParam,PageDetails pageDetails)throws IOException 
 	{
-		String Action = "Verify TextBox Value";
-		String ActionDescription = "Verify Element Title";
-		LocalDateTime StartTime = LocalDateTime.now();
+		String action = "Verify TextBox Value";
+		String actionDescription = "Verify Element Title";
+		LocalDateTime startTime = LocalDateTime.now();
 
-		if((TestData.equalsIgnoreCase("n/a")==false)||(TestData.equalsIgnoreCase("n\\a"))==false||(TestData.equalsIgnoreCase("n\\\\a"))==false)
+		if(!(testData.equalsIgnoreCase("n/a"))||!(testData.equalsIgnoreCase("n\\a"))||!(testData.equalsIgnoreCase("n\\\\a")))
 		{
 
 		try
 		{
-			webkeywords.Instance().FluentWait(_driver, element);
-			if(element.getAttribute("value").equals(TestData)) 
+			Webkeywords.instance().fluentWait(drivernew, element);
+			if(element.getAttribute("value").equals(testData)) 
 			{
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, "Pass");
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, "Pass");
 			}
 			else 
 			{
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 
 			}
 
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
+			logger.error("Failed ==> {} {}" , action , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
 			throw e;
 		}
 		}
 	}
 
-	public boolean VerifyTextDisplayed(WebDriver _driver, WebElement element,String testdata, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public boolean verifyTextDisplayed(WebDriver drivernew, WebElement element,String testdata, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
 		String action = "";
 		String actionDescription = "";
@@ -2691,47 +2394,43 @@ Thread.sleep(100);				break;
 
 boolean isresult=false;
 		
-if((testdata.equalsIgnoreCase("n/a")==false)||(testdata.equalsIgnoreCase("n\\a"))==false||(testdata.equalsIgnoreCase("n\\\\a"))==false)
+if(!(testdata.equalsIgnoreCase("n/a"))||!(testdata.equalsIgnoreCase("n\\a"))||!(testdata.equalsIgnoreCase("n\\\\a")))
 {
 
 
 		try
 		{
-			//Text=Text.replaceAll("[^a-zA-Z0-9]", "");
 
-			if(testdata.equals("N//A")||testdata.equals(null))
+			if(!(testdata.equals("N//A")||testdata==null))
 			{
 
-			}
-			else
-			{
-				scrollIntoViewElement(_driver, element);
-				ZoomWebPage(_driver,"50%",testCaseParam,pageDetails);
+				scrollIntoViewElement(drivernew, element);
+				zoomWebPage(drivernew,"50%",testCaseParam,pageDetails);
 				action="Actual Text Displayed-->"+element.getText()+"Contains Expected Text:-"+testdata;
 				actionDescription = "Actual Text Displayed-->"+element.getText()+"Contains Expected Text:-"+testdata;
-				webkeywords.Instance().FluentWait(_driver, element);
+				Webkeywords.instance().fluentWait(drivernew, element);
 				if(testdata.contains("\""))
 				{
-					testdata=testdata.replaceAll("\"", "");
+					testdata=testdata.replace("\"", "");
 				}
 				if(element.getText().toLowerCase().equalsIgnoreCase(testdata.toLowerCase()))
 				{
-					TestStepDetails.logVerificationDetails(_driver, testCaseParam, action, actionDescription, startTime, Status_Done, element.getText(), testdata);
+					testStepDetails.logVerificationDetails(drivernew, testCaseParam, action, actionDescription, startTime, STATUSDONE, element.getText(), testdata);
 					isresult=true;
 				}
 				else 
 				{
-					TestStepDetails.logTestStepDetails(_driver, testCaseParam, action, actionDescription,pageDetails, startTime, Status_Fail);
+					testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 
 					isresult=false;
 				}
 			}
-			ZoomWebPage(_driver,"100%",testCaseParam,pageDetails);
+			zoomWebPage(drivernew,"100%",testCaseParam,pageDetails);
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + action + actionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, action, actionDescription, startTime,e);
+			logger.error("Failed ==> {} {} " ,action , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
 			throw e;
 		}
 	}
@@ -2740,50 +2439,46 @@ if((testdata.equalsIgnoreCase("n/a")==false)||(testdata.equalsIgnoreCase("n\\a")
 
 
 	
-	public boolean VerifyText(WebDriver _driver, WebElement element,String TestData, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public boolean verifyText(WebDriver drivernew, WebElement element,String testData, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
-		String Action = "";
-		String ActionDescription = "";
-		LocalDateTime StartTime = LocalDateTime.now();
+		String action = "";
+		String actionDescription = "";
+		LocalDateTime startTime = LocalDateTime.now();
 
 
 		try
 		{
-			//Text=Text.replaceAll("[^a-zA-Z0-9]", "");
 
-			if(TestData.equals("N//A")||TestData.equals(null)) 
+			if(!(testData.equals("N//A")||testData==null)) 
 			{
 
-			}
-			else
-			{
-				scrollIntoViewElement(_driver, element);
-				ZoomWebPage(_driver,"50%",testCaseParam,pageDetails);
-				Action="Actual Text Displayed-->"+element.getText()+"Contains Expected Text:-"+TestData;
-				ActionDescription = "Actual Text Displayed-->"+element.getText()+"Contains Expected Text:-"+TestData;
-				webkeywords.Instance().FluentWait(_driver, element);
-				if(TestData.contains("\"")) 
+				scrollIntoViewElement(drivernew, element);
+				zoomWebPage(drivernew,"50%",testCaseParam,pageDetails);
+				action="Actual Text Displayed-->"+element.getText()+"Contains Expected Text:-"+testData;
+				actionDescription = "Actual Text Displayed-->"+element.getText()+"Contains Expected Text:-"+testData;
+				Webkeywords.instance().fluentWait(drivernew, element);
+				if(testData.contains("\"")) 
 				{
-					TestData=TestData.replaceAll("\"", "");
+					testData=testData.replace("\"", "");
 				}
-				if(element.getText().toLowerCase().equalsIgnoreCase(TestData.toLowerCase())) 
+				if(element.getText().toLowerCase().equalsIgnoreCase(testData.toLowerCase())) 
 				{
-					TestStepDetails.logVerificationDetails(_driver, testCaseParam, Action, ActionDescription, StartTime, Status_Done, element.getText(), TestData);
-					//TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
+					testStepDetails.logVerificationDetails(drivernew, testCaseParam, action, actionDescription, startTime, STATUSDONE, element.getText(), testData);
+					
 					return true;
 				}
 				else 
 				{
-					TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+					testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 					return false;
 				}
 			}
-			ZoomWebPage(_driver,"100%",testCaseParam,pageDetails);
+			zoomWebPage(drivernew,"100%",testCaseParam,pageDetails);
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
+			logger.error("Failed ==> {} {}" , action , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
 			throw e;
 		}
 		return false;
@@ -2791,91 +2486,84 @@ if((testdata.equalsIgnoreCase("n/a")==false)||(testdata.equalsIgnoreCase("n\\a")
 
 	
 
-	public void VerifyTextDisplayed_valueattribute(WebDriver _driver, WebElement element,String TestData, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public void verifyTextDisplayedValueAttribute(WebDriver drivernew, WebElement element,String testData, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
-		String Action = "Actual Text Displayed-->"+element.getText()+"Contains Expected Text:-"+TestData;
-		String ActionDescription = "Actual Text Displayed-->"+element.getText()+"Contains Expected Text:-"+TestData;
-		LocalDateTime StartTime = LocalDateTime.now();
+		String action = "Actual Text Displayed-->"+element.getText()+"Contains Expected Text:-"+testData;
+		String actionDescription = "Actual Text Displayed-->"+element.getText()+"Contains Expected Text:-"+testData;
+		LocalDateTime startTime = LocalDateTime.now();
 
-		if((TestData.equalsIgnoreCase("n/a")==false)||(TestData.equalsIgnoreCase("n\\a"))==false||(TestData.equalsIgnoreCase("n\\\\a"))==false)
+		if(!(testData.equalsIgnoreCase("n/a"))||!(testData.equalsIgnoreCase("n\\a"))||!(testData.equalsIgnoreCase("n\\\\a")))
 		{
 
 
 		try
 		{
-			//Text=Text.replaceAll("[^a-zA-Z0-9]", "");
 
-			if(TestData.equals("N//A")||TestData.equals(null)) 
+			if(!(testData.equals("N//A")||testData==null)) 
 			{
 
-			}
-			else
-			{
-				webkeywords.Instance().FluentWait(_driver, element);
-				if(TestData.contains("\"")) 
+				Webkeywords.instance().fluentWait(drivernew, element);
+				if(testData.contains("\"")) 
 				{
-					TestData=TestData.replaceAll("\"", "");
+					testData=testData.replace("\"", "");
 				}
-				if(element.getAttribute("value").toLowerCase().equals(TestData.toLowerCase())) 
+				if(element.getAttribute("value").toLowerCase().equalsIgnoreCase(testData)) 
 				{
-					TestStepDetails.logVerificationDetails(_driver, testCaseParam, Action, ActionDescription, StartTime, Status_Done, element.getText(), TestData);
+					testStepDetails.logVerificationDetails(drivernew, testCaseParam, action, actionDescription, startTime, STATUSDONE, element.getText(), testData);
 				}
 				else 
 				{
-					TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+					testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 
 				}
 			}
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
+			logger.error("Failed ==> {} {} " ,action , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
 			throw e;
 		}
 		}
 	}
 
-	public void VerifyTextDisplayed_titleattribute(WebDriver _driver, WebElement element,String TestData, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public void verifyTextDisplayedTitleAttribute(WebDriver drivernew, WebElement element,String testData, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
-		String Action = "Actual Text Displayed-->"+element.getText()+"Contains Expected Text:-"+TestData;
-		String ActionDescription = "Actual Text Displayed-->"+element.getText()+"Contains Expected Text:-"+TestData;
-		LocalDateTime StartTime = LocalDateTime.now();
+		String action = "Actual Text Displayed-->"+element.getText()+"Contains Expected Text:-"+testData;
+		String actionDescription = "Actual Text Displayed-->"+element.getText()+"Contains Expected Text:-"+testData;
+		LocalDateTime startTime = LocalDateTime.now();
 
-		if((TestData.equalsIgnoreCase("n/a")==false)||(TestData.equalsIgnoreCase("n\\a"))==false||(TestData.equalsIgnoreCase("n\\\\a"))==false)
+		if(!(testData.equalsIgnoreCase("n/a"))||!(testData.equalsIgnoreCase("n\\a"))||!(testData.equalsIgnoreCase("n\\\\a")))
 		{
 
 		try
 		{
-			//Text=Text.replaceAll("[^a-zA-Z0-9]", "");
+			
 
-			if(TestData.equals("N//A")||TestData.equals(null)) 
+			if(!(testData.equals("N//A")||testData ==null)) 
 			{
 
-			}
-			else
-			{
-				webkeywords.Instance().FluentWait(_driver, element);
-				if(TestData.contains("\"")) 
+				Webkeywords.instance().fluentWait(drivernew, element);
+				if(testData.contains("\"")) 
 				{
-					TestData=TestData.replaceAll("\"", "");
+					testData=testData.replace("\"", "");
 				}
-				if(element.getAttribute("title").toLowerCase().equals(TestData.toLowerCase())) 
+				if(element.getAttribute("title").toLowerCase().equalsIgnoreCase(testData)) 
 				{
-					TestStepDetails.logVerificationDetails(_driver, testCaseParam, Action, ActionDescription, StartTime, Status_Done, element.getText(), TestData);
-					//TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
+					testStepDetails.logVerificationDetails(drivernew, testCaseParam, action, actionDescription, startTime, STATUSDONE, element.getText(), testData);
+					
 				}
 				else 
 				{
-					TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+					testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 
 				}
 			}
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
+			logger.error("Failed ==> {} {}" , action , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
 			throw e;
 		}
 		}
@@ -2883,93 +2571,78 @@ if((testdata.equalsIgnoreCase("n/a")==false)||(testdata.equalsIgnoreCase("n\\a")
 
 
 
-	public void VerifyTextDisplayed(WebDriver _driver, WebElement element,ArrayList<String> Text, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public void verifyTextDisplayedNew(WebDriver drivernew, WebElement element,List<String> text, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
-		String Action = "Actual Text Displayed-->"+element.getText()+"Contains Expected Text:-"+Text;
-		String ActionDescription = "Actual Text Displayed-->"+element.getText()+"Contains Expected Text:-"+Text;
-		LocalDateTime StartTime = LocalDateTime.now();
+		String action = "Actual Text Displayed-->"+element.getText()+"Contains Expected Text:-"+text;
+		String actionDescription = "Actual Text Displayed-->"+element.getText()+"Contains Expected Text:-"+text;
+		LocalDateTime startTime = LocalDateTime.now();
 
 
 		try
 		{
-			if(Text.equals("N//A")||Text.equals(null)) 
+			if(!(text.contains("N//A")||text==null)) 
+			
 			{
-
-			}
-			else
-			{
-				webkeywords.Instance().FluentWait(_driver, element);
-				if(element.getText().contains(Text.get(0))) 
+				Webkeywords.instance().fluentWait(drivernew, element);
+				if(element.getText().contains(text.get(0))) 
 				{
-					TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
+					testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 				}
 				else 
 				{
-					TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+					testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 
 				}
 			}
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
+			logger.error("Failed ==> {} {}" ,action , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
 			throw e;
 		}
 	}
 
-	public boolean VerifyTableData(WebDriver _driver, ArrayList<WebElement> element,String Text, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public boolean verifyTableData(WebDriver drivernew, List<WebElement> element,String text, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
-		String Action = "Table Columns Text Displayed-->";
-		String ActionDescription = "Table Columns Text Displayed-->";
-		LocalDateTime StartTime = LocalDateTime.now();
+		String action = TABLECOLUMNMSG;
+		String actionDescription = TABLECOLUMNMSG;
+		LocalDateTime startTime = LocalDateTime.now();
 		boolean verifydata=false;
 
 		try
 		{
-			if(Text.equals("N//A")||Text.equals(null)) 
+			if(!(text.equals("N//A")||text==null))
 			{
 
-			}
-			else
-			{
 
-				ArrayList<WebElement> Element=new ArrayList<WebElement>();
-				Element=element;
-				ArrayList<String> DataList = new ArrayList<String>();
+				List<WebElement> elementnew=new ArrayList<>();
+				elementnew=element;
+				ArrayList<String> dataList = new ArrayList<>();
 
 				String[] dataCount = new String[element.size()];
 				int l = 0;
-				for (WebElement data : Element)
+				for (WebElement data : elementnew)
 				{
-					Action = "Actual Text Displayed-->"+data.getText()+"Expected:-"+Text;
-					ActionDescription = "Actual Text Displayed-->"+data.getText()+"Expected:-"+Text;
+					action = "Actual Text Displayed-->"+data.getText()+"Expected:-"+text;
+					actionDescription = "Actual Text Displayed-->"+data.getText()+"Expected:-"+text;
 					dataCount[l++] = data.getText();
-					DataList.add(data.getText().toString());
+					dataList.add(data.getText());
 
-					if(data.getText().contains(Text)) 
+					if(data.getText().contains(text)) 
 					{
-						TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action,ActionDescription,pageDetails, StartTime, Status_Pass);
+						testStepDetails.logTestStepDetails(drivernew, testCaseParam, action,actionDescription,pageDetails, startTime, STATUSPASS);
 						verifydata= true;
 					} 
 					else 
 					{
-						TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action,ActionDescription,pageDetails, StartTime, Status_Fail);
+						testStepDetails.logTestStepDetails(drivernew, testCaseParam, action,actionDescription,pageDetails, startTime, STATUSFAIL);
 						verifydata= false;
 					}
 
 				}
 			}
-			/*
-			 * if (DataList.stream().anyMatch(s -> s.equals(ExpectedValue))) {
-			 * TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action,
-			 * ActionDescription, StartTime, Status_Pass); } else {
-			 * TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action,
-			 * ActionDescription, StartTime, Status_Fail);
-			 * 
-			 * }
-			 */
-
+		
 
 			return 	verifydata;	
 
@@ -2977,40 +2650,39 @@ if((testdata.equalsIgnoreCase("n/a")==false)||(testdata.equalsIgnoreCase("n\\a")
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
+			logger.error("Failed ==>{} {} " , action , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
 			return false;
 		}
 	}
 
-	public void VerifyTableDataifNull(WebDriver _driver, ArrayList<WebElement> element, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public void verifyTableDataifNull(WebDriver drivernew, List<WebElement> element, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
-		String Action = "Table Columns Text Displayed-->";
-		String ActionDescription = "Table Columns Text Displayed-->";
-		LocalDateTime StartTime = LocalDateTime.now();
+		String action = TABLECOLUMNMSG;
+		String actionDescription = TABLECOLUMNMSG;
+		LocalDateTime startTime = LocalDateTime.now();
 
 
 		try
 		{
-			ArrayList<WebElement> Element=new ArrayList<WebElement>();
-			Element=element;
-			ArrayList<String> DataList = new ArrayList<String>();
+			
+			ArrayList<String> dataList = new ArrayList<>();
 
 			String[] dataCount = new String[element.size()];
 			int l = 0;
-			for (WebElement data : Element)
+			for (WebElement data : element)
 			{
-				Action = "Table Columns Text Displayed-->"+data.getText();
-				ActionDescription = "Table Columns Text Displayed-->"+data.getText();
+				action = TABLECOLUMNMSG+data.getText();
+				actionDescription = TABLECOLUMNMSG+data.getText();
 				dataCount[l++] = data.getText();
-				DataList.add(data.getText().toString());
-				if(!data.getText().equals(null)) 
+				dataList.add(data.getText());
+				if(data.getText()!=null) 
 				{
-					TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
+					testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 				}
 				else 
 				{
-					TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+					testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 
 				}
 			}
@@ -3022,17 +2694,17 @@ if((testdata.equalsIgnoreCase("n/a")==false)||(testdata.equalsIgnoreCase("n\\a")
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
+			logger.error("Failed ==> {} {}" , action , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
 			throw e;
 		}
 	}
 
-	public void VerifyPartialTextDisplayed(WebDriver _driver, WebElement element,String text, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public void verifyPartialTextDisplayed(WebDriver drivernew, WebElement element,String text, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
-		String Action = "Verify Element Partial Text";
-		String ActionDescription = "Verify Element Partial Text";
-		LocalDateTime StartTime = LocalDateTime.now();
+		String action = "Verify Element Partial Text";
+		String actionDescription = "Verify Element Partial Text";
+		LocalDateTime startTime = LocalDateTime.now();
 
 
 		try
@@ -3040,27 +2712,27 @@ if((testdata.equalsIgnoreCase("n/a")==false)||(testdata.equalsIgnoreCase("n\\a")
 
 			if(element.getText().toLowerCase().contains(text.toLowerCase())) 
 			{
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 			}
 			else 
 			{
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 			}
 
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
+			logger.error("Failed ==> {} {} " , action ,actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
 			throw e;
 
 		}
 	}
-	public void VerifyPartialTextDisplayed(WebDriver _driver, WebElement element,String Text,String text, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public void verifyPartialTextDisplayed(WebDriver drivernew, WebElement element,String textnew,String text, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
-		String Action = "Verified "+text+" Partial Text from "+element.getText();
-		String ActionDescription = "Verified "+text+" Partial Text from "+element.getText();
-		LocalDateTime StartTime = LocalDateTime.now();
+		String action = "Verified "+text+" Partial Text from "+element.getText();
+		String actionDescription = "Verified "+text+" Partial Text from "+element.getText();
+		LocalDateTime startTime = LocalDateTime.now();
 
 
 		try
@@ -3068,18 +2740,18 @@ if((testdata.equalsIgnoreCase("n/a")==false)||(testdata.equalsIgnoreCase("n\\a")
 
 			if(element.getText().toLowerCase().contains(text.toLowerCase())) 
 			{
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 			}
 			else 
 			{
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 			}
 
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
+			logger.error("Failed ==> {} {}" ,action ,actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
 			throw e;
 
 		}
@@ -3087,190 +2759,161 @@ if((testdata.equalsIgnoreCase("n/a")==false)||(testdata.equalsIgnoreCase("n\\a")
 
 
 
-	public void VerifyValueEntered(WebDriver _driver, WebElement element,String text, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public void verifyValueEntered(WebDriver drivernew, WebElement element,String text, TestCaseParam testCaseParam,PageDetails pageDetails) 
 	{
-		String Action = "Verify Element  Text";
-		String ActionDescription = "Verify Element  Text";
-		LocalDateTime StartTime = LocalDateTime.now();
+		String action = "Verify Element  Text";
+		String actionDescription = "Verify Element  Text";
+		LocalDateTime startTime = LocalDateTime.now();
 
 
 		try
 		{
-			if(text.equalsIgnoreCase("N//A")||text.equalsIgnoreCase("N/A")) 
+			if(!(text.equalsIgnoreCase("N//A")||text.equalsIgnoreCase("N/A"))) 
 			{
 
-			}
-			else
-			{
 
-				String ActualText=element.getAttribute("value");
+				String actualText=element.getAttribute("value");
 				if(text.contains("\"")) 
 				{
-					text=text.replaceAll("\"", "");
+					text=text.replace("\"", "");
 				}
-				if(ActualText.equals("___-__-____")) 
+				if(actualText.equals("___-__-____")) 
 				{
-					ActualText=ActualText.replace("___-__-____", "");
+					actualText=actualText.replace("___-__-____", "");
 				}
-				if(ActualText.contains("_-")) 
+				if(actualText.contains("_-")) 
 				{
-					ActualText=ActualText.replaceAll("_", "");
-					ActualText=ActualText.replaceAll("-", "");
+					actualText=actualText.replace("_", "");
+					actualText=actualText.replace("-", "");
 				}
 
 
-				Action = "Actual Value Displayed-->"+ActualText+"<--> Expected Value-->"+text;
-				ActionDescription = "Actual Value Displayed-->"+ActualText+"<-->Expected Value-->"+text;
+				action = "Actual Value Displayed-->"+actualText+"<--> Expected Value-->"+text;
+				actionDescription = "Actual Value Displayed-->"+actualText+"<-->Expected Value-->"+text;
 
-				if(ActualText.equalsIgnoreCase(text)) 
+				if(actualText.equalsIgnoreCase(text)) 
 				{
 
-					TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
+					testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 				}
 				else 
 				{
-					TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+					testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 				}
 			}	
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
-			throw e;
+			logger.error("Failed ==> {} {}" ,action , actionDescription);
+			
 
 		}
 	}
 
-	public void VerifyValueSelected(WebDriver _driver, WebElement element,String options, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public void verifyValueSelected(WebDriver drivernew, WebElement element,String options, TestCaseParam testCaseParam,PageDetails pageDetails) 
 	{
-		String Action = "Verify Element  Text";
-		String ActionDescription = "Verify Element  Text";
-		LocalDateTime StartTime = LocalDateTime.now();
+		String action = "Verify Element  Text";
+		String actionDescription = "Verify Element  Text";
+		LocalDateTime startTime = LocalDateTime.now();
 
 
 		try
 		{
-			if(options.equals("N//A") || options.equals("N/A") || options.equals("n//a") || options.equals("n/a")||options.equals(null)) 
-			{
-
-			}
-			else
-			{
-
-				{								
+			if(!isOptionsTrue(options)) 
+							{								
 					Select select = new Select(element);
 					element=select.getFirstSelectedOption();
 
-					String ActualText=element.getText();
+					String actualText=element.getText();
 
 
-					Action = "Actual Value Displayed-->"+ActualText+"<--> Expected Value-->"+options;
-					ActionDescription = "Actual Value Displayed-->"+ActualText+"<-->Expected Value-->"+options;
+					action = "Actual Value Displayed-->"+actualText+"<--> Expected Value-->"+options;
+					actionDescription = "Actual Value Displayed-->"+actualText+"<-->Expected Value-->"+options;
 
-					if(ActualText.equals(options)) 
+					if(actualText.equals(options)) 
 					{
 
-						TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
+						testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 					}
 					else 
 					{
-						TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+						testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 					}
 				}
-			}
-
-
+			
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
-			throw e;
-
+			logger.error("Failed ==> {} {}", action, actionDescription);
+			
 		}
 	}
 
 
 
-	public void VerifyDisabledPropertyOfElement(WebDriver _driver,WebElement element, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public void verifyDisabledPropertyOfElement(WebDriver drivernew,WebElement element, TestCaseParam testCaseParam,PageDetails pageDetails)
 	{
-		String Action = "Verify Disabled Property of Element";
-		String ActionDescription = "Verify Disabled Property of Element";
-		LocalDateTime StartTime = LocalDateTime.now();
-		FluentWait(_driver,element);
-		if(pageDetails.equals(null)) 
+		String action = "Verify Disabled Property of Element";
+		String actionDescription = "Verify Disabled Property of Element";
+		LocalDateTime startTime = LocalDateTime.now();
+		fluentWait(drivernew,element);
+		if(pageDetails != null)
 		{
-			pageDetails.PageActionName="disability";
-			pageDetails.PageActionDescription="";
-		}
 		try
 		{
 			Boolean displayed = true;
 			displayed = element.isDisplayed();
-			if (displayed)
+			if (displayed.equals(true))
 			{
 				String isDisabled = "";
 
 				isDisabled = element.getAttribute("disabled");
-				if(isDisabled==null) 
-				{
-					isDisabled="";
-				}
+				isDisabled = isReadyEmpty(isDisabled);
 				String isReadOnly = "";
 				isReadOnly = element.getAttribute("readonly");
-				if(isReadOnly==null) 
-				{
-					isReadOnly="";
-				}
+				isReadOnly = isReadyEmpty(isReadOnly);
 				String pointereventproperty="";
 				pointereventproperty =element.getAttribute("style");
 				boolean pointerevent=pointereventproperty.contains("pointer-events: none");
-				if(pointerevent==true) 
+				
+				if(pointerevent) 
 				{
-					Action = "The field is Disabled and Readonly, which is as expected";
-					ActionDescription = "The field is Disabled and Readonly, which is as expected";
-					TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Pass);                    
+					action = "The field is Disabled and Readonly, which is as expected";
+					actionDescription = "The field is Disabled and Readonly, which is as expected";
+					testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSPASS);                    
 				}
 
 				else 
 				{
-					if (isDisabled.equals("true") && isReadOnly.equals("true"))
+					if (isReadDisableTrue(isDisabled, isReadOnly))
 					{
-						Action = "The field is Disabled and Readonly, which is as expected";
-						ActionDescription = "The field is Disabled and Readonly, which is as expected";
-						TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Pass);
+						action = "The field is Disabled and Readonly, which is as expected";
+						actionDescription = "The field is Disabled and Readonly, which is as expected";
+						testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSPASS);
 
 					}
-					else if (isReadOnly.equals("") && isDisabled.equals("true"))
+					else if (isReadblnkisDisabledtrue(isDisabled, isReadOnly))
 					{
-						Action = "The field is Disabled, which is as expected";
-						ActionDescription = "The field is Disabled, which is as expected";
-						TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Pass);
+						action = "The field is Disabled, which is as expected";
+						actionDescription = "The field is Disabled, which is as expected";
+						testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSPASS);
 					}
-					else if (isReadOnly.equals("true")&&(isDisabled.equals("")||isDisabled.equals(null)))
+					else if (isDisableNull(isDisabled, isReadOnly))
 					{
-						Action = "The field is Readonly, which is as expected";
-						ActionDescription = "The field is Readonly, which is as expected";
-						TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Pass);
-
-					}
-
-					else if(isDisabled.equals("")||isDisabled.equals(null))
-					{
-						Action = "The field is not Disabled and Readonly, which is not as expected";
-						ActionDescription = "The field is not Disabled and Readonly, which is not as expected";
-						TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+						action = "The field is Readonly, which is as expected";
+						actionDescription = "The field is Readonly, which is as expected";
+						testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSPASS);
 
 					}
 
-					else 
+					else
 					{
-						Action = "The field is not Disabled and Readonly, which is not as expected";
-						ActionDescription = "The field is not Disabled and Readonly, which is not as expected";
-						TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+						action = "The field is not Disabled and Readonly, which is not as expected";
+						actionDescription = "The field is not Disabled and Readonly, which is not as expected";
+						testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 
 					}
+
 				}
 
 
@@ -3279,37 +2922,60 @@ if((testdata.equalsIgnoreCase("n/a")==false)||(testdata.equalsIgnoreCase("n\\a")
 			}
 			else
 			{
-				Action = "The Element is not found";
-				ActionDescription = "The field is not Disabled and Readonly, which is not as expected";
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+				action = "The Element is not found";
+				actionDescription = "The field is not Disabled and Readonly, which is not as expected";
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 
 			}
 
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
-			throw e;
-
+			logger.error("Failed ==> {} {}" , action, actionDescription);
+			
+		}
 		}
 	}
+	
 
-	public void verifypropertyofelement(WebDriver _driver, WebElement element, String dataValue, TestCaseParam testCaseParam, PageDetails pageDetails) throws Exception
-	{
-		String Action = "Verify Property of Element-->"+element.getAttribute("Value");
-		String ActionDescription = "Verify Property of Element-->"+element.getAttribute("Value");
-		LocalDateTime StartTime = LocalDateTime.now();
-		if(pageDetails.equals(null)) 
+	private String isReadyEmpty(String isReadOnly) {
+		if(isReadOnly==null) 
 		{
-			pageDetails.PageActionName="";
-			pageDetails.PageActionDescription="";
+			isReadOnly="";
 		}
+		return isReadOnly;
+	}
+
+	private boolean isDisableBlank(String isDisabled) {
+		return isDisabled.equals("")||isDisabled==null;
+	}
+
+	private boolean isDisableNull(String isDisabled, String isReadOnly) {
+		return isReadOnly.equals("true")&&isDisableBlank(isDisabled);
+	}
+
+	private boolean isReadblnkisDisabledtrue(String isDisabled, String isReadOnly) {
+		return isReadOnly.equals("") && isDisabled.equals("true");
+	}
+
+	private boolean isReadDisableTrue(String isDisabled, String isReadOnly) {
+		return isDisabled.equals("true") && isReadOnly.equals("true");
+	}
+
+	public void verifypropertyofelement(WebDriver drivernew, WebElement element, String dataValue, TestCaseParam testCaseParam, PageDetails pageDetails) throws IOException 
+	{
+		String action = "Verify Property of Element-->"+element.getAttribute("Value");
+		String actionDescription = "Verify Property of Element-->"+element.getAttribute("Value");
+		LocalDateTime startTime = LocalDateTime.now();
+		if(pageDetails != null) 
+		{
+			
+		
 		try
 		{
 			Boolean displayed = true;
 			displayed = element.isDisplayed();
-			if (displayed)
+			if (displayed.equals(true))
 			{
 				String prop = "";
 				String[] data = null;
@@ -3319,290 +2985,299 @@ if((testdata.equalsIgnoreCase("n/a")==false)||(testdata.equalsIgnoreCase("n\\a")
 
 				if (prop.equals(data[1]))
 				{
-					Action = "The " + data[0] + " Property of the element is as expected";
-					ActionDescription = "The " + data[0] + " Property of the element is as expected";
-					TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
+					action = "The " + data[0] + " Property of the element is as expected";
+					actionDescription = "The " + data[0] + " Property of the element is as expected";
+					testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 
 				}
 				else 
 				{
-					Action = "The " + data[0] + " Property of the element is not as expected";
-					ActionDescription = "The " + data[0] + " Property of the element is not as expected";
-					TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+					action = "The " + data[0] + " Property of the element is not as expected";
+					actionDescription = "The " + data[0] + " Property of the element is not as expected";
+					testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 
 				}
 			}
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
+			logger.error("Failed ==> {} {} " , action , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
 			throw e;
 
 		}
+		}
 	}
 
-	public void VerifyCheckBoxIsNotChecked(WebDriver _driver,WebElement element,TestCaseParam testCaseParam, PageDetails pageDetails ) throws Exception
+	public void verifyCheckBoxIsNotChecked(WebDriver drivernew,WebElement element,TestCaseParam testCaseParam, PageDetails pageDetails ) throws IOException 
 	{
-		String Action="";
-		String ActionDescription="";
-		LocalDateTime StartTime = LocalDateTime.now();
+		String action="";
+		String actionDescription="";
+		LocalDateTime startTime = LocalDateTime.now();
 		try
 		{
 
 			if (!element.isSelected())
 			{
 
-				Action = "The element is Not checked";
-				ActionDescription = "The element is Not checked";
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
+				action = "The element is Not checked";
+				actionDescription = "The element is Not checked";
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 
 			}
 			else
 			{
-				Action = "The element is  checked";
-				ActionDescription = "The element is  checked";
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+				action = "The element is  checked";
+				actionDescription = "The element is  checked";
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 
 			}
 		}
 		catch (Exception e)
 		{
 
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
-			throw e;
+			logger.error("Failed ==>{} {} " , action , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
+			
 		}
 
 	}
 
-	public void DismissAlertMessage(WebDriver _driver, TestCaseParam testCaseParam, PageDetails pageDetails) throws Exception
+	public void dismissAlertMessage(WebDriver drivernew, TestCaseParam testCaseParam, PageDetails pageDetails) throws IOException 
 	{
 
 
-		String Action="";
-		String ActionDescription="";
-		LocalDateTime StartTime = LocalDateTime.now();
+		String action="";
+		String actionDescription="";
+		LocalDateTime startTime = LocalDateTime.now();
 
 
 		try
 		{
-			_driver.switchTo().alert().dismiss();
-			Action = "Successfully Dismissed Alert Message";
-			ActionDescription = "Successfully Dismissed Alert Message";
-			//TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
+			drivernew.switchTo().alert().dismiss();
 
 		}
 		catch (Exception e)
 		{
-			Action = "Failed to Dismiss Alert Message";
-			ActionDescription = "Failed to Dismiss Alert Message";
-			TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+			action = "Failed to Dismiss Alert Message";
+			actionDescription = "Failed to Dismiss Alert Message";
+			testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 
 		}
 
 
 	}
 
-	public void EnterTextByFunctionKeys(WebDriver _driver,WebElement element,Keys key,String KeyValue, TestCaseParam testCaseParam, PageDetails pageDetails) throws Exception
+	public void enterTextByFunctionKeys(WebDriver drivernew,WebElement element,Keys key,String keyValue, TestCaseParam testCaseParam, PageDetails pageDetails) throws IOException 
 	{
 
 
-		String Action="";
-		String ActionDescription="";
-		LocalDateTime StartTime = LocalDateTime.now();
+		String action="";
+		String actionDescription="";
+		LocalDateTime startTime = LocalDateTime.now();
 
 
 		try
 		{
-			webkeywords.Instance().FluentWait(_driver, element);
-			WebDriverWait wait = new WebDriverWait(_driver, 1000);
+			Webkeywords.instance().fluentWait(drivernew, element);
+			WebDriverWait wait = new WebDriverWait(drivernew, 1000);
 			wait.until(ExpectedConditions.elementToBeClickable(element));				
 
-			element.sendKeys(key+KeyValue);
+			element.sendKeys(key+keyValue);
 
-			LocalDateTime EndTime =  LocalDateTime.now();
+			
 
-			logger.info("Successfully Entered Text" + key + "to " + element);
+			logger.info("Successfully Entered Text {} to {}",key,element);
 		}
 		catch (Exception e)
 		{
-			Action = "Failed to Dismiss Alert Message";
-			ActionDescription = "Failed to Dismiss Alert Message";
-			TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+			action = "Failed to Dismiss Alert Message";
+			actionDescription = "Failed to Dismiss Alert Message";
+			testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 
 		}
 
 
 	}
 
-	public void EnterTextByFunctionKeys(WebDriver _driver,WebElement element,Keys key, TestCaseParam testCaseParam, PageDetails pageDetails) throws Exception
+	public void enterTextByFunctionKeys(WebDriver drivernew,WebElement element,Keys key, TestCaseParam testCaseParam, PageDetails pageDetails) throws IOException
 	{
 
 
-		String Action="";
-		String ActionDescription="";
-		LocalDateTime StartTime = LocalDateTime.now();
+		String action="";
+		String actionDescription="";
+		LocalDateTime startTime = LocalDateTime.now();
 
 
 		try
 		{
-			webkeywords.Instance().FluentWait(_driver, element);
-			WebDriverWait wait = new WebDriverWait(_driver, 1000);
+			Webkeywords.instance().fluentWait(drivernew, element);
+			WebDriverWait wait = new WebDriverWait(drivernew, 1000);
 			wait.until(ExpectedConditions.elementToBeClickable(element));				
 
 			element.sendKeys(key);
-
-			LocalDateTime EndTime =  LocalDateTime.now();
-
-			logger.info("Successfully Entered Text" + key + "to " + element);
+			
+			logger.info("Successfully Entered Text {} to {}",key ,element);
 		}
 		catch (Exception e)
 		{
-			Action = "Failed to Dismiss Alert Message";
-			ActionDescription = "Failed to Dismiss Alert Message";
-			TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+			action = "Failed to Dismiss Alert Message";
+			actionDescription = "Failed to Dismiss Alert Message";
+			testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 
 		}
 
 
 	}
 
-	public void ZoomWebPage(WebDriver _driver,String ZoomValue, TestCaseParam testCaseParam, PageDetails pageDetails) throws Exception
+	public void zoomWebPage(WebDriver drivernew,String zoomValue, TestCaseParam testCaseParam, PageDetails pageDetails) 
 	{
 
 
-		String Action="";
-		String ActionDescription="";
-		LocalDateTime StartTime = LocalDateTime.now();
+		String action="";
+		String actionDescription="";
+		LocalDateTime startTime = LocalDateTime.now();
 
 
 
 		try
 		{
 
-			JavascriptExecutor executor = (JavascriptExecutor)_driver;
-			executor.executeScript("document.body.style.zoom = '"+ZoomValue+"'");
-			Action = "Sucessfully Zoomed the page to -->"+ZoomValue;
-			ActionDescription = "Sucessfully Zoomed the page to -->"+ZoomValue;
-			TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
+			JavascriptExecutor executor = (JavascriptExecutor)drivernew;
+			executor.executeScript("document.body.style.zoom = '"+zoomValue+"'");
+			action = "Sucessfully Zoomed the page to -->"+zoomValue;
+			actionDescription = "Sucessfully Zoomed the page to -->"+zoomValue;
+			testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 
 
 		}
 		catch (Exception e)
 		{
-			Action = "Failed to Zoom the page";
-			ActionDescription = "Failed to Zoom the page";
-			TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+			action = "Failed to Zoom the page";
+			actionDescription = "Failed to Zoom the page";
+			logger.error("Failed ==> {} {}" , action , actionDescription);
 
 		}
 
 
 	}
 
-	public void MouseHover(WebDriver _driver,WebElement element, TestCaseParam testCaseParam, PageDetails pageDetails) throws Exception
+	public void mouseHover(WebDriver drivernew,WebElement element, TestCaseParam testCaseParam, PageDetails pageDetails)
 	{
 
 
-		String Action="Mouse Hover";
-		String ActionDescription="Mouse Hover";
-		LocalDateTime StartTime = LocalDateTime.now();
+		String actionnew="Mouse Hover";
+		String actionDescription="Mouse Hover";
+		LocalDateTime startTime = LocalDateTime.now();
 
 
 
 		try
 		{
-			webkeywords.Instance().FluentWait(_driver, element);
-			Actions action = new Actions(_driver);
+			Webkeywords.instance().fluentWait(drivernew, element);
+			Actions action = new Actions(drivernew);
 
 			action.moveToElement(element).build().perform();
-			TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
+			testStepDetails.logTestStepDetails(drivernew, testCaseParam, actionnew, actionDescription,pageDetails, startTime, STATUSDONE);
 
 
 		}
 		catch (Exception e)
 		{
-			Action = "Failed do mouse hover";
-			ActionDescription = "Failed do mouse hover";
-			TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
-
+			actionnew = "Failed do mouse hover";
+			actionDescription = "Failed do mouse hover";
+			logger.error("Failed ==> {} {}" , actionnew , actionDescription);
 		}
 
 
 	}
 
-	public void VerifyDropdownValues(WebDriver _driver, WebElement element,String options, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public void verifyDropdownValues(WebDriver drivernew, WebElement element,String options, TestCaseParam testCaseParam,PageDetails pageDetails) throws IOException 
 	{
-		String Action = "Verify Dropdown Values";
-		String ActionDescription = "Verify Dropdown Values";
-		LocalDateTime StartTime = LocalDateTime.now();
+		String action = "Verify Dropdown Values";
+		String actionDescription = "Verify Dropdown Values";
+		LocalDateTime startTime = LocalDateTime.now();
 
 
 		try
 		{
-			if(options.equals("N//A") || options.equals("N/A") || options.equals("n//a") || options.equals("n/a")||options.equals(null)) 
+			if(!isOptionsTrue(options)) 
 			{
 
-			}
-			else
-			{
 
-				{		
-					ArrayList<String> Actualvalues=new ArrayList<String>();
-					ArrayList<String> Expectedvalues=new ArrayList<String>();
+						
+					ArrayList<String> actualvalues=new ArrayList<>();
+					ArrayList<String> expectedvalues=new ArrayList<>();
 					Select select = new Select(element);
 					int count=0;
 
 					String[] exvalues=options.split(";");
 					for(int i=0; i<exvalues.length;i++) 
 					{
-						Expectedvalues.add(exvalues[i]);
+						expectedvalues.add(exvalues[i]);
 					}
 
-					int expectedcount=Expectedvalues.size();
-					List<WebElement> elements = select.getOptions();
-					for (WebElement we : elements) {
-						for (int i = 0; i < Expectedvalues.size(); i++) 
-						{
-							if (we.getText().equals(Expectedvalues.get(i))) 
-							{
-								Actualvalues.add(we.getText());
-								count++;
-								break;
-							}
-						}
-
-					}
-					if(count==0) 
-					{
-						TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
-
-					}
+					int expectedcount=expectedvalues.size();
+					count = actualvaluesList(actualvalues, expectedvalues, select, count);
+					countZeroValidation(drivernew, testCaseParam, pageDetails, action, actionDescription, startTime,
+							count);
 					if(count==expectedcount) 
 					{
-						Action = "Verify Dropdown values<=>Expected Values="+Expectedvalues+"<=>Actual Values="+Actualvalues;
-						ActionDescription = "Verify Dropdown values<=>Expected Values="+Expectedvalues+"<=>Actual Values="+Actualvalues;
-						TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
+						action = "Verify Dropdown values<=>Expected Values="+expectedvalues+"<=>Actual Values="+actualvalues;
+						actionDescription = "Verify Dropdown values<=>Expected Values="+expectedvalues+"<=>Actual Values="+actualvalues;
+						testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 
 					}
 
-				}	
+				
 			}
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
+			logger.error("Failed ==> {} {}" ,action ,actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
 			throw e;
 
 		}
 	}
 
-	public void ScrollUpPageToTheTop(WebDriver driver) throws Exception
+	private int actualvaluesList(ArrayList<String> actualvalues, ArrayList<String> expectedvalues, Select select,
+			int count) {
+		List<WebElement> elements = select.getOptions();
+		for (WebElement we : elements) {
+			for (int i = 0; i < expectedvalues.size(); i++) 
+			{
+				if (we.getText().equals(expectedvalues.get(i))) 
+				{
+					actualvalues.add(we.getText());
+					count++;
+					break;
+				}
+			}
+
+		}
+		return count;
+	}
+
+	private void countZeroValidation(WebDriver drivernew, TestCaseParam testCaseParam, PageDetails pageDetails,
+			String action, String actionDescription, LocalDateTime startTime, int count) throws IOException 
+	{
+		if(count==0) 
+		{
+			testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
+
+		}
+	}
+
+	private boolean isOptionsTrue(String options) {
+		return options.equals("N//A") || options.equals("N/A") || options.equals("n//a") || options.equals("n/a")||options==null;
+	}
+
+	public void scrollUpPageToTheTop(WebDriver driver) 
 	{
 
-		String Action = "Scroll Up Page To The Top";
-		String ActionDescription = "Scroll Up Page To The Top";
+		String action = "Scroll Up Page To The Top";
+		String actionDescription = "Scroll Up Page To The Top";
 
 
 
@@ -3615,18 +3290,18 @@ if((testdata.equalsIgnoreCase("n/a")==false)||(testdata.equalsIgnoreCase("n\\a")
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			throw e;
+			logger.error("Failed ==> {} {}",action,actionDescription);
+		
 		}
 
 
 
 	}
 
-	public void scrollIntoViewElement(WebDriver driver, WebElement element) throws Exception
+	public void scrollIntoViewElement(WebDriver driver, WebElement element)
 	{
 
-		webkeywords.Instance().FluentWait(driver, element);
+		Webkeywords.instance().fluentWait(driver, element);
 
 		JavascriptExecutor js = (JavascriptExecutor) driver;
 
@@ -3636,23 +3311,20 @@ if((testdata.equalsIgnoreCase("n/a")==false)||(testdata.equalsIgnoreCase("n\\a")
 
 
 
-	public void verifydropdownoptionnotavailable(WebDriver _driver, WebElement element, String options, TestCaseParam testCaseParam, PageDetails pageDetails) throws Exception
+	public void verifydropdownoptionnotavailable(WebDriver drivernew, WebElement element, String options, TestCaseParam testCaseParam, PageDetails pageDetails)throws IOException 
 	{
-		String Action = "Verifying Dropdown Options -->"+element.getText()+" : does not contain :-"+options;
-		String ActionDescription = "Verifying Dropdown Options -->"+element.getText()+" : does not contain :-"+options;
-		LocalDateTime StartTime = LocalDateTime.now();
-		Boolean Valuefound = true;
+		String action = "Verifying Dropdown Options -->"+element.getText()+" : does not contain :-"+options;
+		String actionDescription = "Verifying Dropdown Options -->"+element.getText()+" : does not contain :-"+options;
+		LocalDateTime startTime = LocalDateTime.now();
+		Boolean valuefound = true;
 
 		try
 		{
-			if ("N//A".equals(options) || options == null)
+			if (!("N//A".equals(options) || options == null))
 				{
 
-			}
-			else
-			{
 
-				webkeywords.Instance().FluentWait(_driver, element);
+				Webkeywords.instance().fluentWait(drivernew, element);
 				Select select = new Select(element);
 				List<WebElement> allOptions = select.getOptions();
 				for(int i=0; i<allOptions.size(); i++) 
@@ -3660,96 +3332,96 @@ if((testdata.equalsIgnoreCase("n/a")==false)||(testdata.equalsIgnoreCase("n\\a")
 
 					if(allOptions.get(i).getText().contains(options)) 
 					{
-						Valuefound=false;
-						Action = "Verify Dropdown-->contains "+allOptions.get(i).getText()+"which is not as Expected";
-						ActionDescription = "Verify Dropdown-->contains "+allOptions.get(i).getText()+"which is not as Expected";
+						valuefound=false;
+						action = "Verify Dropdown-->contains "+allOptions.get(i).getText()+"which is not as Expected";
+						actionDescription = "Verify Dropdown-->contains "+allOptions.get(i).getText()+"which is not as Expected";
 
 						break;
 					}
 				}
-				if(Valuefound) 
+				if(valuefound.equals(true)) 
 				{
-					TestStepDetails.logVerificationDetails(_driver, testCaseParam, Action, ActionDescription, StartTime, Status_Done, element.getText(), options);
+					testStepDetails.logVerificationDetails(drivernew, testCaseParam, action, actionDescription, startTime, STATUSDONE, element.getText(), options);
 				}
 				else 
 				{
-					TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+					testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 
 				}
 			}
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
-			throw e;
+			logger.error("Failed ==> {} {}" , action , actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
+			
 		}
 	}
 
 
 
 
-	public void openNewTabwithURL(WebDriver _driver, String URL, TestCaseParam testCaseParam, PageDetails pageDetails) throws Exception
+	public void openNewTabwithURL(WebDriver drivernew, String url, TestCaseParam testCaseParam, PageDetails pageDetails) throws IOException 
 	{
-		String Action = "Open new tab with url";
-		String ActionDescription = "Open new tab with url";
-		LocalDateTime StartTime = LocalDateTime.now();
+		String action = "Open new tab with url";
+		String actionDescription = "Open new tab with url";
+		LocalDateTime startTime = LocalDateTime.now();
 
 
 		try
 		{
-			JavascriptExecutor javaScript = (JavascriptExecutor) _driver;
+			JavascriptExecutor javaScript = (JavascriptExecutor) drivernew;
 
-			javaScript.executeScript("window.open(arguments[0])", URL);
-			webkeywords.Instance().WaitForPageToLoad(_driver, 5000);
+			javaScript.executeScript("window.open(arguments[0])", url);
+			Webkeywords.instance().waitForPageToLoad(drivernew, 5000);
 			Thread.sleep(5000);
-			String currentWindow = _driver.getWindowHandle();
-			logger.info("Current Window: " + currentWindow);
+			String currentWindow = drivernew.getWindowHandle();
+			logger.info("Current Window: {} " , currentWindow);
 
-			int windowsCount = _driver.getWindowHandles().size();
-			logger.info("Count of Windows: " + windowsCount);
+			int windowsCount = drivernew.getWindowHandles().size();
+			logger.info("Count of Windows: {}" , windowsCount);
 
 			if (windowsCount > 1) 
 			{
 				logger.info("New Window is opened. Switching the control to the new window");
-				ArrayList<String> tab = new ArrayList<>(_driver.getWindowHandles());
-				_driver.switchTo().window(tab.get(1));
-				webkeywords.Instance().WaitForPageToLoad(_driver, 5000);
+				ArrayList<String> tab = new ArrayList<>(drivernew.getWindowHandles());
+				drivernew.switchTo().window(tab.get(1));
+				Webkeywords.instance().waitForPageToLoad(drivernew, 5000);
 			}
 
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
-			throw e;
+			logger.error("Failed ==> {} {}",action,actionDescription);
+			testStepDetails.logExceptionDetails(drivernew, testCaseParam, action, actionDescription, startTime,e);
+			testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
+			
 		}
 	}
 
-	//Pass the option as "title" attribute value on the web page
-	public void VerifyDropdownValueSelected(WebDriver _driver, WebElement element,String options, TestCaseParam testCaseParam,PageDetails pageDetails) throws Exception
+	public void verifyDropdownValueSelected(WebDriver drivernew, WebElement element,String options, TestCaseParam testCaseParam,PageDetails pageDetails)
 	{
-		String Action = "Verify Element  Text";
-		String ActionDescription = "Verify Element  Text";
-		LocalDateTime StartTime = LocalDateTime.now();
+		String action = "Verify Element  Text";
+		String actionDescription = "Verify Element  Text";
+		LocalDateTime startTime = LocalDateTime.now();
 
 
 		try
 		{
-			String ActualText=element.getAttribute("title");
+			String actualText=element.getAttribute("title");
 
 
-			Action = "Actual Value Displayed-->"+ActualText+"<--> Expected Value-->"+options;
-			ActionDescription = "Actual Value Displayed-->"+ActualText+"<-->Expected Value-->"+options;
+			action = "Actual Value Displayed-->"+actualText+"<--> Expected Value-->"+options;
+			actionDescription = "Actual Value Displayed-->"+actualText+"<-->Expected Value-->"+options;
 
-			if(ActualText.equals(options)) 
+			if(actualText.equals(options)) 
 			{
 
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Done);
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 			}
 			else 
 			{
-				TestStepDetails.logTestStepDetails(_driver, testCaseParam, Action, ActionDescription,pageDetails, StartTime, Status_Fail);
+				testStepDetails.logTestStepDetails(drivernew, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSFAIL);
 			}
 
 
@@ -3757,28 +3429,23 @@ if((testdata.equalsIgnoreCase("n/a")==false)||(testdata.equalsIgnoreCase("n\\a")
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed ==> " + Action + ActionDescription);
-			TestStepDetails.logExceptionDetails(_driver, testCaseParam, Action, ActionDescription, StartTime,e);
-			throw e;
+			logger.error("Failed ==> {} {}" ,action,actionDescription);
+		
 
 		}
 	}
 
 
-	//Added method by Thamodharan
-	//To capture UI performance for navigating one screen to another 
-public  void navigateToNextPage(WebDriver driver,WebElement element, TestCaseParam testCaseParam, PageDetails pageDetails ) throws Exception
+public  void navigateToNextPage(WebDriver driver,WebElement element, TestCaseParam testCaseParam, PageDetails pageDetails ) throws IOException
 {
-	String Action = "Capture Page Response Time";
-	String ActionDescription = "Capture Page Response Time";
+	String action = "Capture Page Response Time";
+	String actionDescription = "Capture Page Response Time";
 	String sspHeader = "//div[@class='ssp-header']/..//h1";
 
-//	NavigationTimeHelper navigationTimeHelper = new NavigationTimeHelper();
-//	UIPerfModel uiPerfModel = new UIPerfModel();
-//	UIPerfConstants uiPerfConstants = new UIPerfConstants();
-//	
+
 	String getHeaderBeforeClick = "";
 	String getHeaderAfterClick = "";
+	LocalDateTime startTime=  LocalDateTime.now();
 	
 	try {
 		WebDriverWait wait=new WebDriverWait(driver, 3);
@@ -3790,10 +3457,11 @@ public  void navigateToNextPage(WebDriver driver,WebElement element, TestCasePar
 	    
 	} catch (Exception e) {
 	  logger.info("Getting title of Current page");
+	  testStepDetails.logTestStepDetails(driver, testCaseParam, action, actionDescription,pageDetails, startTime, STATUSDONE);
 	    getHeaderBeforeClick = driver.getTitle();
 	}
 
-	LocalDateTime startTime = LocalDateTime.now();
+	
 	if (!element.getText().equals("NULL") || !element.getText().equals("") || !element.getAttribute("title").isBlank()) {
 	    try {
 	        if (element.isDisplayed()) {
@@ -3801,12 +3469,12 @@ public  void navigateToNextPage(WebDriver driver,WebElement element, TestCasePar
 	            executor.executeScript("arguments[0].click();", element);
 	            WebDriverWait wait = new WebDriverWait(driver, 3);
 	            wait.until(webDriver -> ((JavascriptExecutor) webDriver).executeScript("return document.readyState").equals("complete"));
-	            //TestStepDetails.logTestStepDetails(driver, testCaseParam, Action, ActionDescription, pageDetails, StartTime, Status_Pass);
 	        }
 	    } catch (Exception e) {
 	        logger.info("Unable to click on element");
+	        
 	   }
-		long startTimePerf = System.currentTimeMillis();
+		
 		
 	    try {
 	        WebDriverWait wait=new WebDriverWait(driver, 5);
@@ -3831,8 +3499,7 @@ public  void navigateToNextPage(WebDriver driver,WebElement element, TestCasePar
 	        logger.info("Measuring performance metrics done");
 	        
 	} catch (NoSuchElementException e) {
-	    logger.error("Failed ==> " + Action + ActionDescription);
-	    TestStepDetails.logExceptionDetails(driver, testCaseParam, Action, ActionDescription, startTime, e);
+	    logger.error("Failed ==> {} {}",action,actionDescription);
 	    throw e;
 	}
 	}

@@ -3,8 +3,9 @@ package api_tests.testng.common;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.List;
 import java.io.File;
+import java.io.IOException;
 
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
@@ -41,13 +42,13 @@ public class APITestNGCommon {
     }
 	
 	
-	public void executeAPI(TestCaseParam testCaseParam,  String apiname,String apimodulename,String apifilename) throws Exception
+	public void executeAPI(TestCaseParam testCaseParam,  String apiname,String apimodulename,String apifilename) throws IOException
     {
 
 		String filePath = APITestSettings.getApiTestSettings().getApiDirectory() + File.separator + apifilename;
 
 		APIController apiController = new APIController();
-		ArrayList<APIReportModel> reportData=apiController.executeAPI(testCaseParam.getTestCaseName(),apimodulename,apiname,testCaseParam.getBrowser(),String.valueOf(testCaseParam.getIteration()),filePath);
+		List<APIReportModel> reportData=apiController.executeAPI(testCaseParam.getTestCaseName(),apimodulename,apiname,testCaseParam.getBrowser(),String.valueOf(testCaseParam.getIteration()),filePath);
 
 
 	         for(APIReportModel apiReportModel : reportData)
@@ -59,7 +60,7 @@ public class APITestNGCommon {
 	        	 
 
 					ReportCommon testStepDetails = new ReportCommon();
-					testStepDetails.logAPIDetails( testCaseParam,  apiname, apiname,pageDetails, LocalDateTime.now(), apiReportModel.getTestStepResult(),apiReportModel.getUrl(),apiReportModel.getRequest(), apiReportModel.getActualResponse());
+					testStepDetails.logAPIDetails(testCaseParam, apiname,LocalDateTime.now(), apiReportModel.getTestStepResult(),apiReportModel.getUrl(),apiReportModel.getRequest(), apiReportModel.getActualResponse());
 
 	         }
 
