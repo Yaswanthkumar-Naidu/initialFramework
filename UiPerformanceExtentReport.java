@@ -54,72 +54,21 @@ public class UiPerformanceExtentReport
 			ExtentReports extentlcl = new ExtentReports();
 			tryCatchBlock(htmlReporterlcl, extentlcl);
 
-			if (UIPerformanceConstants.uiPerfData != null)
+			if (UIPerformanceConstants.getUiPerfData() != null)
 			{
 
 
-				for (String  ScreenName : UIPerformanceConstants.uiPerfData.keySet())
+				for (String  ScreenName : UIPerformanceConstants.getUiPerfData().keySet())
 				{
 					String result = "";
 					ExtentTest test = extentlcl.createTest(ScreenName);
 
 					test.assignCategory(browserName);
 
-					ArrayList<UIPerformanceModel> uiPerfModels=UIPerformanceConstants.uiPerfData.get(ScreenName);
+					ArrayList<UIPerformanceModel> uiPerfModels=UIPerformanceConstants.getUiPerfData().get(ScreenName);
 
 
-					for(UIPerformanceModel uiPerfModel:uiPerfModels)
-					{
-						ExtentTest multiTCNode=test.createNode("Test Case : "+ uiPerfModel.testCaseName + "  :: ModuleName : " + uiPerfModel.moduleName + " :: BrowserName : " + uiPerfModel.browserName);	
-
-						if(uiPerfModel.responseTimeMillisecond<=UIPerformanceConstants.EXPECTEDRESPONSETIMEINMILLISECOND)
-						{
-							result = uiPerfModelEntries(result, uiPerfModel, multiTCNode);
-						}
-						else
-						{
-							result = entries(result, uiPerfModel, multiTCNode);
-						}
-						String sheetName=null;
-						if(sheets.containsKey(ScreenName)) {
-							for(String s:TestRunSettings.UIPerformanceResultsMap.keySet()) {
-								if(s.contains(sheets.get(ScreenName))) {
-									count++;
-								}
-							}
-							if(ScreenName.length()>25) {
-								String newScreenName=ScreenName.substring(0,Math.min(ScreenName.length(), 25));
-								sheetName=newScreenName+"_"+count;
-
-							}else {
-								sheetName=ScreenName+"_"+count;
-							}
-						}else {
-							count=1;
-							if(ScreenName.length()>25) {
-								String newScreenName=ScreenName.substring(0,Math.min(ScreenName.length(), 25));
-								sheetName=newScreenName+"_"+count;
-
-							}else {
-								sheetName=ScreenName+"_"+count;
-							}
-						}
-						sheets.put(ScreenName,sheetName);
-						TestRunSettings.UIPerformanceResultsMap.put(sheetName, result);
-						screenNameSheetNameMap.put(sheetName, uiPerfModel.testCaseName);
-						ArrayList<String> s=new ArrayList<>();
-
-						s.add(uiPerfModel.testCaseName);
-						sheetScreenHashMap.put(sheetName,ScreenName);
-						if(screenNameToTestCasesMap.get(ScreenName)==null) {
-							screenNameToTestCasesMap.put(ScreenName, s);
-						}else {
-							screenNameToTestCasesMap.get(ScreenName).add(uiPerfModel.testCaseName);
-						}
-						writetoExcel(workbook,result,sheetName);
-						writeworkbook(workbook, reportPath);
-
-					}
+					count = extracted(reportPath, count, ScreenName, result, test, uiPerfModels);
 				}
 				createDashboard(workbook);
 				writeworkbook(workbook, reportPath);
@@ -133,65 +82,114 @@ public class UiPerformanceExtentReport
 				
 		}
 	}
+
+	private int extracted(String reportPath, int count, String screenName, String result, ExtentTest test,
+			ArrayList<UIPerformanceModel> uiPerfModels) throws IOException {
+		for(UIPerformanceModel uiPerfModel:uiPerfModels)
+		{
+			ExtentTest multiTCNode=test.createNode("Test Case : "+ uiPerfModel.getTestCaseName() + "  :: ModuleName : " + uiPerfModel.getModuleName() + " :: BrowserName : " + uiPerfModel.getBrowserName());	
+
+			if(uiPerfModel.getResponseTimeMillisecond()<=UIPerformanceConstants.EXPECTEDRESPONSETIMEINMILLISECOND)
+			{
+				result = uiPerfModelEntries(result,uiPerfModel, multiTCNode);
+			}
+			else
+			{
+				result = entries(result, uiPerfModel, multiTCNode);
+			}
+			String sheetName=null;
+			String sheetPrefix = sheets.getOrDefault(screenName, screenName);
+			int counts = (int) TestRunSettings.getUiperformanceresultsmap().keySet().stream()
+			        .filter(s -> s.contains(sheetPrefix))
+			        .count() + 1;
+
+			String newScreenName = screenName.length() > 25 ? screenName.substring(0, 25) : screenName;
+			sheetName = newScreenName + "_" + counts;
+
+			sheets.put(screenName,sheetName);
+			TestRunSettings.getUiperformanceresultsmap().put(sheetName, result);
+			screenNameSheetNameMap.put(sheetName, uiPerfModel.getTestCaseName());
+			ArrayList<String> s=new ArrayList<>();
+
+			s.add(uiPerfModel.getTestCaseName());
+			sheetScreenHashMap.put(sheetName,screenName);
+			if(screenNameToTestCasesMap.get(screenName)==null) {
+				screenNameToTestCasesMap.put(screenName, s);
+			}else {
+				screenNameToTestCasesMap.get(screenName).add(uiPerfModel.getTestCaseName());
+			}
+			writetoExcel(workbook,result,sheetName);
+			writeworkbook(workbook, reportPath);
+
+		}
+		return count;
+	}
 	
 	private String uiPerfModelEntries(String result, UIPerformanceModel uiPerfModel, ExtentTest multiTCNode) {
-		for(String s:uiPerfModel.entries) {
-			result=result+"\n "+ s;
-		}
-		multiTCNode.pass(" SourceScreen : " + uiPerfModel.sourceScreen+ "<br>  "
-				+ " DestinationScreen : " + uiPerfModel.destinationScreen+ "<br>  "
-				+ " Source_DestinationScreen : " + uiPerfModel.sourceDestinationScreen+ "<br>  "
-				+ " ResponseTime : " + uiPerfModel.responseTime+ "<br>  "
-				+ " ResponseTimeMillisecond : " + uiPerfModel.responseTimeMillisecond+ "<br>  "
-				+ " TestCaseName : " + uiPerfModel.testCaseName+ "<br>  "
-				+ " ModuleName : " + uiPerfModel.moduleName+ "<br>  "
-				+ " BrowserName : " + uiPerfModel.browserName+ "<br>  "
-				+ " StartTime : " + uiPerfModel.startTime+ "<br>  "
-				+ " EndTime : " + uiPerfModel.endtime+ "<br>  "
-				+ " PageLoadTime : " + uiPerfModel.pageLoadTime+ "<br> "
-				+ " TTFB : " +uiPerfModel.ttfb+ "<br> "
-				+ " EndToEndResponseTime : "+uiPerfModel.endtoendRespTime+ "<br> "
+	    StringBuilder sb = new StringBuilder(result);
+
+	    for (String entry : uiPerfModel.getEntries()) {
+	        sb.append("\n ").append(entry);
+	    }
+		multiTCNode.pass(" SourceScreen : " + uiPerfModel.getSourceScreen()+ "<br>  "
+				+ " DestinationScreen : " + uiPerfModel.getDestinationScreen()+ "<br>  "
+				+ " Source_DestinationScreen : " + uiPerfModel.getSourceDestinationScreen()+ "<br>  "
+				+ " ResponseTime : " + uiPerfModel.getResponseTime()+ "<br>  "
+				+ " ResponseTimeMillisecond : " + uiPerfModel.getResponseTimeMillisecond()+ "<br>  "
+				+ " TestCaseName : " + uiPerfModel.getTestCaseName()+ "<br>  "
+				+ " ModuleName : " + uiPerfModel.getModuleName()+ "<br>  "
+				+ " BrowserName : " + uiPerfModel.getBrowserName()+ "<br>  "
+				+ " StartTime : " + uiPerfModel.getStartTime()+ "<br>  "
+				+ " EndTime : " + uiPerfModel.getEndtime()+ "<br>  "
+				+ " PageLoadTime : " + uiPerfModel.getPageLoadTime()+ "<br> "
+				+ " TTFB : " +uiPerfModel.getTtfb()+ "<br> "
+				+ " EndToEndResponseTime : "+uiPerfModel.getEndtoendRespTime()+ "<br> "
 				);
-		return result;
+		 return sb.toString();
 	}
+	
 	private String entries(String result, UIPerformanceModel uiPerfModel, ExtentTest multiTCNode) {
-		for(String s:uiPerfModel.entries) {
-			result=result+"\n "+ s;
-		}
-		multiTCNode.fail(" SourceScreen : " + uiPerfModel.sourceScreen+ "<br>  "
-				+ " DestinationScreen : " + uiPerfModel.destinationScreen+ "<br>  "
-				+ " Source_DestinationScreen : " + uiPerfModel.sourceDestinationScreen+ "<br>  "
-				+ " ResponseTime : " + uiPerfModel.responseTime+ "<br>  "
-				+ " ResponseTimeMillisecond : " + uiPerfModel.responseTimeMillisecond+ "<br>  "
-				+ " TestCaseName : " + uiPerfModel.testCaseName+ "<br>  "
-				+ " ModuleName : " + uiPerfModel.moduleName+ "<br>  "
-				+ " BrowserName : " + uiPerfModel.browserName+ "<br>  "
-				+ " StartTime : " + uiPerfModel.startTime+ "<br>  "
-				+ " EndTime : " + uiPerfModel.endtime+ "<br>  "
-				+ " PageLoadTime : " + uiPerfModel.pageLoadTime+ "<br> "
-				+ " TTFB : " +uiPerfModel.ttfb+ "<br> "
-				+ " EndToEndResponseTime : "+uiPerfModel.endtoendRespTime+ "<br> "
+	    StringBuilder sb = new StringBuilder(result);
+
+	    for (String entry : uiPerfModel.getEntries()) {
+	        sb.append("\n ").append(entry);
+	    }
+	    
+		multiTCNode.fail(" SourceScreen : " + uiPerfModel.getSourceScreen()+ "<br>  "
+				+ " DestinationScreen : " + uiPerfModel.getDestinationScreen()+ "<br>  "
+				+ " Source_DestinationScreen : " + uiPerfModel.getSourceDestinationScreen()+ "<br>  "
+				+ " ResponseTime : " + uiPerfModel.getResponseTime()+ "<br>  "
+				+ " ResponseTimeMillisecond : " + uiPerfModel.getResponseTimeMillisecond()+ "<br>  "
+				+ " TestCaseName : " + uiPerfModel.getTestCaseName()+ "<br>  "
+				+ " ModuleName : " + uiPerfModel.getModuleName()+ "<br>  "
+				+ " BrowserName : " + uiPerfModel.getBrowserName()+ "<br>  "
+				+ " StartTime : " + uiPerfModel.getStartTime()+ "<br>  "
+				+ " EndTime : " + uiPerfModel.getEndtime()+ "<br>  "
+				+ " PageLoadTime : " + uiPerfModel.getPageLoadTime()+ "<br> "
+				+ " TTFB : " +uiPerfModel.getTtfb()+ "<br> "
+				+ " EndToEndResponseTime : "+uiPerfModel.getEndtoendRespTime()+ "<br> "
 				);
 
-		resourceType(uiPerfModel, multiTCNode);
-		return result;
+		 resourceType(uiPerfModel, multiTCNode);
+		 return sb.toString();
 	}
+	
 	private void resourceType(UIPerformanceModel uiPerfModel, ExtentTest multiTCNode) {
-		for(String resourceType: uiPerfModel.mapEntryModel.keySet())
+		for(String resourceType: uiPerfModel.getMapEntryModel().keySet())
 		{
 			ExtentTest resourceTypeNode=multiTCNode.createNode("Resource  Type : "+ resourceType);	
-			ArrayList<EntryModel> lstEntryModel=uiPerfModel.mapEntryModel.get(resourceType);
+			ArrayList<EntryModel> lstEntryModel=uiPerfModel.getMapEntryModel().get(resourceType);
 			for (EntryModel entryModel :lstEntryModel)
 			{
 
 				resourceTypeNode.log(Status.FAIL,
-						"EntryName : "+ entryModel.entryName
-						+"<br>EntryType : "+ entryModel.entryType
-						+"<br>InitiatorType : "+ entryModel.initiatorType
-						+"<br>StartTime : "+ entryModel.startTime
-						+"<br>EndTime : "+ entryModel.endTime
-						+"<br>Duration : "+ entryModel.duration
-						+"<br>TransferSize : "+ entryModel.transferSize);
+						"EntryName : "+ entryModel.getEntryName()
+						+"<br>EntryType : "+ entryModel.getEntryType()
+						+"<br>InitiatorType : "+ entryModel.getInitiatorType()
+						+"<br>StartTime : "+ entryModel.getStartTime()
+						+"<br>EndTime : "+ entryModel.getEndTime()
+						+"<br>Duration : "+ entryModel.getDuration()
+						+"<br>TransferSize : "+ entryModel.getTransferSize());
 			}
 		}
 	}
@@ -338,7 +336,7 @@ public class UiPerformanceExtentReport
 			CreationHelper createHelper = workbook.getCreationHelper();
 			int rowNum = 1;
 
-			for (String screenName : TestRunSettings.UIPerformanceResultsMap.keySet()) {
+			for (String screenName : TestRunSettings.getUiperformanceresultsmap().keySet()) {
 						
 				double mean=calculateMean(screenName);
 				screenNameToTotalMean.put(screenName, mean);
@@ -421,62 +419,60 @@ public class UiPerformanceExtentReport
 			hyperlinkStyle.setBorderTop(BorderStyle.THIN);
 			hyperlinkStyle.setTopBorderColor(IndexedColors.BLACK.getIndex());
 
+			for (Map.Entry<String, Double> entry : screenNameToTotalMeanNew.entrySet()) {
+			    String screenName = entry.getKey();
+			    Double totalMean = entry.getValue();
 
-			for (String entry : screenNameToTotalMeanNew.keySet()) {
-				Row row = dashboardSheet.createRow(rowNum++);
-				Cell cell1=row.createCell(0);
-				cell1.setCellValue((double) rowNum - 1);
-				cell1.setCellStyle(style);
-				String screenName = entry;
-				row.createCell(1).setCellValue(screenName);
+			    Row row = dashboardSheet.createRow(rowNum++);
+			    Cell cell1 = row.createCell(0);
+			    cell1.setCellValue((double) rowNum - 1);
+			    cell1.setCellStyle(style);
 
-				Cell cell = row.getCell(1);
-				cell.setCellStyle(style);
-				cell.setCellValue(screenName);
+			    row.createCell(1).setCellValue(screenName);
+			    Cell cell = row.getCell(1);
+			    cell.setCellStyle(style);
 
-				Cell cell2=row.createCell(2);
-				cell2.setCellValue(screenNameToTotalMeanNew.get(entry));
-				cell2.setCellStyle(style);
-				Cell cell3=row.createCell(3);
-				cell3.setCellValue(screenNameToMedian.get(entry));
-				cell3.setCellStyle(style);
-				Cell cell4=row.createCell(4);
-				cell4.setCellValue(screenNameToMinimum.get(entry));
-				cell4.setCellStyle(style);
-				Cell cell5=row.createCell(5);
-				cell5.setCellValue(screenNameToMaximun.get(entry));
-				cell5.setCellStyle(style);
-				String arrayData="";
-				boolean f=true;
-				int count=0;
-				String keyDataForSheetName=sheetScreenHashMap.get(entry);
-				for(String s:screenNameToTestCasesMap.get(keyDataForSheetName)) {
-					if(f) {
-						arrayData+=s;
-						f=false;
-					}else {
-					arrayData+=":"+s;
-					}
-					count++;
-				}
-				
-				Cell cell6=row.createCell(6);
-				cell6.setCellValue(count);
-				cell6.setCellStyle(style);
-			
-				Cell cell7=row.createCell(7);
-				cell7.setCellValue(arrayData);
-				cell7.setCellStyle(style);
-			
-				Cell cell8=row.createCell(8);
-				cell8.setCellValue(screenNameSheetNameMap.get(entry));
-				cell8.setCellStyle(hyperlinkStyle);
-				Hyperlink link = createHelper.createHyperlink(HyperlinkType.DOCUMENT);
-				link.setAddress("'" + screenName + "'!A1"); 
-				cell8.setHyperlink(link);
+			    Cell cell2 = row.createCell(2);
+			    cell2.setCellValue(totalMean);
+			    cell2.setCellStyle(style);
 
+			    Cell cell3 = row.createCell(3);
+			    cell3.setCellValue(screenNameToMedian.get(screenName));
+			    cell3.setCellStyle(style);
+
+			    Cell cell4 = row.createCell(4);
+			    cell4.setCellValue(screenNameToMinimum.get(screenName));
+			    cell4.setCellStyle(style);
+
+			    Cell cell5 = row.createCell(5);
+			    cell5.setCellValue(screenNameToMaximun.get(screenName));
+			    cell5.setCellStyle(style);
+
+			    StringBuilder arrayData = new StringBuilder();
+			    String keyDataForSheetName = sheetScreenHashMap.get(screenName);
+			    List<String> testCases = screenNameToTestCasesMap.get(keyDataForSheetName);
+			    for (int i = 0; i < testCases.size(); i++) {
+			        if (i > 0) {
+			            arrayData.append(":");
+			        }
+			        arrayData.append(testCases.get(i));
+			    }
+
+			    Cell cell6 = row.createCell(6);
+			    cell6.setCellValue(testCases.size());
+			    cell6.setCellStyle(style);
+
+			    Cell cell7 = row.createCell(7);
+			    cell7.setCellValue(arrayData.toString());
+			    cell7.setCellStyle(style);
+
+			    Cell cell8 = row.createCell(8);
+			    cell8.setCellValue(screenNameSheetNameMap.get(screenName));
+			    cell8.setCellStyle(hyperlinkStyle);
+			    Hyperlink link = createHelper.createHyperlink(HyperlinkType.DOCUMENT);
+			    link.setAddress("'" + screenName + "'!A1");
+			    cell8.setHyperlink(link);
 			}
-
 			
 			dashboardSheet.setColumnWidth(0, 10 * 250); 
 			dashboardSheet.setColumnWidth(1, 20 * 250);
@@ -604,7 +600,7 @@ public class UiPerformanceExtentReport
 	public static Map<String, Double> maximumValueForDashboard(Map<String,Double> screenNameToTotalMean) {
 		HashMap<String, Double> screenNameResult = new HashMap<>();
 
-		for(String k:TestRunSettings.UIPerformanceResultsMap.keySet()) {
+		for(String k:TestRunSettings.getUiperformanceresultsmap().keySet()) {
 
 			double maxAccountValue = Double.MIN_VALUE;
 			String latestKey=null;

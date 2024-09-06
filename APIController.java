@@ -9,10 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import api_utilities.api_common.APIMaster;
-import api_utilities.Models.APIModel;
-import api_utilities.Models.APIReportModel;
-import api_utilities.TestSettings.APISessionData;
-import api_utilities.TestSettings.APITestSettings;
+import api_utilities.models.APIModel;
+import api_utilities.models.APIReportModel;
+import api_utilities.test_settings.APISessionData;
+import api_utilities.test_settings.APITestSettings;
 import io.restassured.response.Response;
 
 public class APIController {
@@ -24,7 +24,7 @@ public class APIController {
 		ArrayList<APIReportModel> apiReportModels = new ArrayList<>();
 		Response response = null;
 		try {
-			APIModel iModel=	interfaceMaster.fetchInterfaceRepository(APITestSettings.apiTestSettings,testcase,moduleName,interfaceName,iteration,apiFilePath);
+			APIModel iModel=	interfaceMaster.fetchInterfaceRepository(APITestSettings.getApiTestSettings(),testcase,moduleName,interfaceName,iteration,apiFilePath);
 
 			RESTHelper apiREST = new RESTHelper();
 			SOAPHelper apiSOAP = new SOAPHelper();
@@ -43,10 +43,10 @@ public class APIController {
 			{
 				response=apiREST.executeRESTAPI(iModel,iteration,methodType);	
 				APIReportModel apiReportModel = new APIReportModel();
-				apiReportModel.URL=url;
-				apiReportModel.Request=request;
-				apiReportModel.Response=response.getBody().asString();
-				apiReportModel.StatusCode = "Status Code: =>"+response.getStatusCode()+"; Status Line: =>"+response.getStatusLine();
+				apiReportModel.setUrl(url);
+				apiReportModel.setRequest(request);
+				apiReportModel.setResponse(response.getBody().asString());
+				apiReportModel.setStatusCode("Status Code: =>"+response.getStatusCode()+"; Status Line: =>"+response.getStatusLine());
 
 
 				if(response.statusCode()==200)
@@ -56,46 +56,46 @@ public class APIController {
 						apiReportModels=validateREST.validateAPIPostResponse(apiReportModel, expectedResponse);
 
 					}
-					else if(!iModel.getResponseValidationModel().XPathJSONPath.isEmpty())
+					else if(!iModel.getResponseValidationModel().getxPathJsonPath().isEmpty())
 					{
-						apiReportModels=validateREST.validateJSONPath(apiReportModel,iModel.getResponseValidationModel().XPathJSONPath);
+						apiReportModels=validateREST.validateJSONPath(apiReportModel,iModel.getResponseValidationModel().getxPathJsonPath());
 
 
 					}
 
 					else {
-					HashMap<String,String> sessionData = validateREST.storeJSONPath(response.getBody().asString(), iModel.getStoreResponseModel().XPathJSONPath);
+					HashMap<String,String> sessionData = validateREST.storeJSONPath(response.getBody().asString(), iModel.getStoreResponseModel().getXpathJsonPath());
 
 
 					APISessionData.setSessionDataCollection(testcase, moduleName, browser, iteration, sessionData);
 
-					apiReportModel.TestStepResult="PASS";
-					apiReportModel.AdditionalDetails=iModel.getInterfaceName() + " executed successfully.";
+					apiReportModel.setTestStepResult("PASS");
+					apiReportModel.setAdditionalDetails(iModel.getInterfaceName() + " executed successfully.");
 					apiReportModels.add(apiReportModel);
 					}
 				}
 				else
 				{
 					apiReportModels.add(apiReportModel);
-					apiReportModels.get(0).TestStepResult="FAIL";
-					apiReportModels.get(0).AdditionalDetails=iModel.getInterfaceName() + " Failed. Response Code : +" +response.statusCode() + "Error Details : " + response.asString();
+					apiReportModels.get(0).setTestStepResult("FAIL");
+					apiReportModels.get(0).setAdditionalDetails(iModel.getInterfaceName() + " Failed. Response Code : +" +response.statusCode() + "Error Details : " + response.asString());
 					
 				}
 				//DB VALIDATION
-				if(APITestSettings.DBValidation.equalsIgnoreCase("Yes")) {
+				if(APITestSettings.DBVALIDATION.equalsIgnoreCase("Yes")) {
 					if(!(dbQuery.equalsIgnoreCase("N//A"))) {
 
-						apiReportModel.DBActualValue = validateDB.validateDBStatus(iModel);
-						apiReportModel.DBExpectedValue = iModel.getDBExpectedValue();
-						apiReportModel.DBValidation = iModel.getDBQuery();
-						if(iModel.getDBExpectedValue().equals(apiReportModel.DBActualValue)) {
-							apiReportModels.get(0).TestStepResult="PASS";
-							apiReportModels.get(0).AdditionalDetails=apiReportModel.AdditionalDetails+":DB Validation was successful.";
+						apiReportModel.setDbActualValue(validateDB.validateDBStatus(iModel));
+						apiReportModel.setDbExpectedValue(iModel.getDBExpectedValue());
+						apiReportModel.setDbValidation(iModel.getDBQuery());
+						if(iModel.getDBExpectedValue().equals(apiReportModel.getDbActualValue())) {
+							apiReportModels.get(0).setTestStepResult("PASS");
+							apiReportModels.get(0).setAdditionalDetails(apiReportModel.getAdditionalDetails()+":DB Validation was successful.");
 						}
 						else
 						{
-							apiReportModels.get(0).TestStepResult="FAIL";
-							apiReportModels.get(0).AdditionalDetails=apiReportModel.AdditionalDetails+":Expected value mismatch in DB validation";
+							apiReportModels.get(0).setTestStepResult("FAIL");
+							apiReportModels.get(0).setAdditionalDetails(apiReportModel.getAdditionalDetails()+":Expected value mismatch in DB validation");
 						}
 
 					}
@@ -107,28 +107,28 @@ public class APIController {
 
 				response=apiSOAP.executeSOAPAPI(iModel,iteration);	
 				APIReportModel apiReportModel = new APIReportModel();
-				apiReportModel.URL=url;
-				apiReportModel.Request=request;
-				apiReportModel.Response=response.getBody().asString();	
+				apiReportModel.setUrl(url);
+				apiReportModel.setRequest(request);
+				apiReportModel.setResponse(response.getBody().asString());	
 				if(response.statusCode()==200)
 				{
 					if(!iModel.getResponsePath().equals(("")))
 					{
 						apiReportModels=validateSOAP.validateAPIPostResponse(apiReportModel, expectedResponse);
 					}
-					else if(!iModel.getResponseValidationModel().XPathJSONPath.isEmpty())
+					else if(!iModel.getResponseValidationModel().getxPathJsonPath().isEmpty())
 					{
 
-						apiReportModels=validateSOAP.validateXPath(apiReportModel,iModel.getResponseValidationModel().XPathJSONPath);
+						apiReportModels=validateSOAP.validateXPath(apiReportModel,iModel.getResponseValidationModel().getxPathJsonPath());
 					}
 
 					else {
-					HashMap<String,String> sessionData = validateSOAP.storeXPath(response.getBody().asString(), iModel.getStoreResponseModel().XPathJSONPath);
+					HashMap<String,String> sessionData = validateSOAP.storeXPath(response.getBody().asString(), iModel.getStoreResponseModel().getXpathJsonPath());
 
 
 					APISessionData.setSessionDataCollection(testcase, moduleName, browser, iteration, sessionData);
-					apiReportModel.TestStepResult="PASS";
-					apiReportModel.AdditionalDetails=iModel.getInterfaceName() + " executed successfully.";
+					apiReportModel.setTestStepResult("PASS");
+					apiReportModel.setAdditionalDetails(iModel.getInterfaceName() + " executed successfully.");
 					apiReportModels.add(apiReportModel);
 					}
 
@@ -136,27 +136,27 @@ public class APIController {
 				else
 				{
 					apiReportModels.add(apiReportModel);
-					apiReportModels.get(0).TestStepResult="FAIL";
-					apiReportModels.get(0).AdditionalDetails=iModel.getInterfaceName() + " Failed. Response Code : +" +response.statusCode() + "Error Details : " + response.asString();
+					apiReportModels.get(0).setTestStepResult("FAIL");
+					apiReportModels.get(0).setAdditionalDetails(iModel.getInterfaceName() + " Failed. Response Code : +" +response.statusCode() + "Error Details : " + response.asString());
 					
 				}
 				
 				//DB VALIDATION
-				if(APITestSettings.DBValidation.equalsIgnoreCase("Yes")) {
+				if(APITestSettings.DBVALIDATION.equalsIgnoreCase("Yes")) {
 					if(!((dbQuery.equalsIgnoreCase("N//A")) || (dbQuery.equalsIgnoreCase("")))) {
 
-						apiReportModel.DBActualValue = validateDB.validateDBStatus(iModel);
-						apiReportModel.DBExpectedValue = iModel.getDBExpectedValue();
-						apiReportModel.DBValidation = iModel.getDBQuery();
-						if(iModel.getDBExpectedValue().equals(apiReportModel.DBActualValue)) {
-							apiReportModels.get(0).TestStepResult="PASS";
-							apiReportModels.get(0).AdditionalDetails=apiReportModel.AdditionalDetails+":DB Validation was successful.";
+						apiReportModel.setDbActualValue(validateDB.validateDBStatus(iModel));
+						apiReportModel.setDbExpectedValue(iModel.getDBExpectedValue());
+						apiReportModel.setDbValidation(iModel.getDBQuery());
+						if(iModel.getDBExpectedValue().equals(apiReportModel.getDbActualValue())) {
+							apiReportModels.get(0).setTestStepResult("PASS");
+							apiReportModels.get(0).setAdditionalDetails(apiReportModel.getAdditionalDetails()+":DB Validation was successful.");
 							
 						}
 						else
 						{
-							apiReportModels.get(0).TestStepResult="FAIL";
-							apiReportModels.get(0).AdditionalDetails=apiReportModel.AdditionalDetails+":Expected value mismatch in DB validation";
+							apiReportModels.get(0).setTestStepResult("FAIL");
+							apiReportModels.get(0).setAdditionalDetails(apiReportModel.getAdditionalDetails()+":Expected value mismatch in DB validation");
 							
 						}
 
